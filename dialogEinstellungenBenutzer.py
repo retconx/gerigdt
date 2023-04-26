@@ -26,8 +26,8 @@ class EinstellungenBenutzer(QDialog):
         self.setMinimumSize(QSize(300,250))
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
+        self.buttonBox.accepted.connect(self.accept) # type: ignore
+        self.buttonBox.rejected.connect(self.reject) # type: ignore
 
         dialogLayoutV = QVBoxLayout()
         dialogLayoutG = QGridLayout()

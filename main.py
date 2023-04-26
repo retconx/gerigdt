@@ -25,7 +25,7 @@ basedir = os.path.dirname(__file__)
 
 # Sicherstellen, dass Icon in Windows angezeigt wird
 try:
-    from ctypes import windll
+    from ctypes import windll # type: ignore
     mayappid = "gdttools.gerigdt"
     windll.shell32.SetCurrentProcessExplicitAppUserModelID(mayappid)
 except ImportError:
@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
                     self.buttonAlteUntersuchung.setIcon(reloadIcon)
                     self.buttonAlteUntersuchung.setEnabled(False)
                     self.buttonAlteUntersuchung.setToolTip("Funktion nicht verfügbar")
-                    self.buttonAlteUntersuchung.clicked.connect(self.vorherigeUntersuchungWiederherstellen)
+                    self.buttonAlteUntersuchung.clicked.connect(self.vorherigeUntersuchungWiederherstellen) # type: ignore
                     groupboxStatusanzeigeLayout.addWidget(self.buttonAlteUntersuchung, i, 0)
                 self.statusanzeigeLabel.append(QLabel(text + ": -"))
                 self.statusanzeigeLabel[i].setStyleSheet("font-weight:normal")
@@ -347,8 +347,9 @@ class MainWindow(QMainWindow):
             self.untdatEdit.setDate(untdat.currentDate())
             self.untdatEdit.setDisplayFormat("dd.MM.yyyy")
             self.untdatEdit.setCalendarPopup(True)
+            self.untdatEdit.userDateChanged.connect(self.datumGeaendert) # type: ignore
             self.dokuvonComboBox = QComboBox()
-            self.dokuvonComboBox.currentIndexChanged.connect(self.benutzerGewechselt)
+            self.dokuvonComboBox.currentIndexChanged.connect(self.benutzerGewechselt)# type: ignore
             benutzernamen = self.configIni["Benutzer"]["namen"].split("::")
             benutzerkuerzel = self.configIni["Benutzer"]["kuerzel"].split("::")
             for i in range(len(benutzernamen)):
@@ -366,7 +367,7 @@ class MainWindow(QMainWindow):
             if self.patId == "-":
                 pushbuttonDatenSenden.setEnabled(False)
                 pushbuttonDatenSenden.setToolTip("Senden nicht möglich, da keine GDT-Datei vom PVS geladen")
-            pushbuttonDatenSenden.clicked.connect(self.datenSendenClicked)
+            pushbuttonDatenSenden.clicked.connect(self.datenSendenClicked) # type: ignore
             datenLayoutH.addLayout(datenLayoutG)
             datenLayoutH.addSpacing(20)
             datenLayoutH.addWidget(pushbuttonDatenSenden)
@@ -385,13 +386,13 @@ class MainWindow(QMainWindow):
             menu = self.menuBar()
             einstellungenMenu = menu.addMenu("Einstellungen")
             einstellungenAllgemeinAction = QAction("Allgemeine Einstellungen", self)
-            einstellungenAllgemeinAction.triggered.connect(self.einstellungenAllgemein)
+            einstellungenAllgemeinAction.triggered.connect(self.einstellungenAllgemein) # type: ignore
             einstellungenAllgemeinAction.setShortcut(QKeySequence("Ctrl+E"))
             einstellungenGdtAction = QAction("GDT-Einstellungen", self)
-            einstellungenGdtAction.triggered.connect(self.einstellungenGdt)
+            einstellungenGdtAction.triggered.connect(self.einstellungenGdt) # type: ignore
             einstellungenGdtAction.setShortcut(QKeySequence("Ctrl+G"))
             einstellungenBenutzerAction = QAction("Benutzer verwalten", self)
-            einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer)
+            einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer) # type: ignore
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
             einstellungenMenu.addAction(einstellungenAllgemeinAction)
             einstellungenMenu.addAction(einstellungenGdtAction)
@@ -451,6 +452,12 @@ class MainWindow(QMainWindow):
     def vorherigeUntersuchungWiederherstellen(self):
         if self.vorherigeDokuLaden:
             self.mitVorherigerUntersuchungAusfuellen()
+
+    def datumGeaendert(self, datum):
+        gewaehltesDatum = QDate(datum)
+        if gewaehltesDatum.daysTo(QDate().currentDate()) < 0:
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Das Untersuchungsdatum darf nicht in der Zukunft liegen.", QMessageBox.StandardButton.Ok)
+            mb.exec()
 
     def benutzerGewechselt(self):
         self.aktuelleBenuztzernummer = self.dokuvonComboBox.currentIndex()
