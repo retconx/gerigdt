@@ -528,6 +528,7 @@ class MainWindow(QMainWindow):
     def einstellungenAllgemein(self):
         de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)
         if de.exec() == 1:
+            self.configIni["Allgemein"]["dokuverzeichnis"] = de.lineEditArchivierungsverzeichnis.text()
             if de.checkboxVorherigeDokuLaden.isChecked():
                 self.configIni["Allgemein"]["vorherigedokuladen"] = "1"
             else:

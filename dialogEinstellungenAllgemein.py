@@ -31,22 +31,6 @@ class EinstellungenAllgemein(QDialog):
         self.buttonBox.rejected.connect(self.reject) # type: ignore
 
         dialogLayoutV = QVBoxLayout()
-        # # Groupbox Konfigurationsverzeichnis
-        # groupboxKonfigurationsverzeichnis = QGroupBox("Konfigurationsverzeichnis")
-        # groupboxKonfigurationsverzeichnis.setStyleSheet("font-weight:bold")
-        # labelConfigIniSpeichernIn = QLabel("config.ini speichern in:")
-        # labelConfigIniSpeichernIn.setStyleSheet("font-weight:normal")
-        # self.lineEditKonfigurationsverzeichnis= QLineEdit(self.dokuverzeichnis)
-        # self.lineEditKonfigurationsverzeichnis.setStyleSheet("font-weight:normal")
-        # buttonDurchsuchenKonfigurationsverzeichnis = QPushButton("Durchsuchen")
-        # buttonDurchsuchenKonfigurationsverzeichnis.setStyleSheet("font-weight:normal")
-        # buttonDurchsuchenKonfigurationsverzeichnis.clicked.connect(self.durchsuchenKonfigurationsverzeichnis) # type: ignore
-        # groupboxLayoutKonfigurationsverzeichnis = QGridLayout()
-        # groupboxLayoutKonfigurationsverzeichnis.addWidget(labelConfigIniSpeichernIn, 0, 0, 1, 2)
-        # groupboxLayoutKonfigurationsverzeichnis.addWidget(self.lineEditKonfigurationsverzeichnis, 1, 0)
-        # groupboxLayoutKonfigurationsverzeichnis.addWidget(buttonDurchsuchenKonfigurationsverzeichnis, 1, 1)
-        # groupboxKonfigurationsverzeichnis.setLayout(groupboxLayoutKonfigurationsverzeichnis)
-        # Groupbox Dokumentationsverwaltung
         groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
         groupboxDokumentationsverwaltung.setStyleSheet("font-weight:bold")
         labelArchivierungsverzeichnis = QLabel("Archivierungsverzeichnis:")
