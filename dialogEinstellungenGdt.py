@@ -14,16 +14,15 @@ from PySide6.QtWidgets import (
     QComboBox
 )
 
-basedir = os.path.dirname(__file__)
 zeichensatz = ["7Bit", "IBM (Standard) CP 437", "ISO8859-1 (ANSI) CP 1252"]
 
 class EinstellungenGdt(QDialog):
-    def __init__(self):
+    def __init__(self, configPath):
         super().__init__()
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
-        configIni.read(os.path.join(basedir, "config.ini"))
+        configIni.read(os.path.join(configPath, "config.ini"))
         self.gdtImportVerzeichnis = configIni["Verzeichnisse"]["gdtimport"]
         if self.gdtImportVerzeichnis == "":
             self.gdtImportVerzeichnis = os.getcwd()

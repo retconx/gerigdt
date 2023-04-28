@@ -1,4 +1,4 @@
-import sys, configparser, os, datetime
+import sys, configparser, os, datetime, shutil
 import gdt, gdtzeile
 import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein
 
@@ -23,6 +23,32 @@ from PySide6.QtWidgets import (
 
 basedir = os.path.dirname(__file__)
 
+def versionVeraltet(versionAktuell:str, versionVergleich:str):
+    """
+    Vergleicht zwei Versionen im Format x.x.x
+    Parameter:
+        versionAktuell:str
+        versionVergleich:str
+    Rückgabe:
+        True, wenn versionAktuell veraltet
+    """
+    versionVeraltet= False
+    hunderterBase = int(versionVergleich.split(".")[0])
+    zehnerBase = int(versionVergleich.split(".")[1])
+    einserBase = int(versionVergleich.split(".")[2])
+    hunderter = int(versionAktuell.split(".")[2])
+    zehner = int(versionAktuell.split(".")[1])
+    einser = int(versionAktuell.split(".")[2])
+    if hunderterBase > hunderter:
+        versionVeraltet = True
+    elif hunderterBase == hunderter:
+        if zehnerBase >zehner:
+            versionVeraltet = True
+        elif zehnerBase == zehner:
+            if einserBase > einser:
+                versionVeraltet = True
+    return versionVeraltet
+
 # Sicherstellen, dass Icon in Windows angezeigt wird
 try:
     from ctypes import windll # type: ignore
@@ -45,28 +71,6 @@ class MainWindow(QMainWindow):
     timedUpGo = ["< 10 Sekunden - keine Mobilitätseinschränkung", "11-19 Sekunden - leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - starke Mobilitätseinschränkung"]
     kognitiveFunktion = ["Keine oder leichte Einschränkung", "Mittlere Einschränkung", "Schwere Einschränkung"]
     pflegegrad = ["1", "2", "3", "4", "5", "Nicht vorhanden/unbekannt", "Beantragt"]
-
-    #config.ini lesen
-    configIni = configparser.ConfigParser()
-    configIni.read(os.path.join(basedir, "config.ini"))
-    gdtImportVerzeichnis = configIni["Verzeichnisse"]["gdtimport"]
-    if gdtImportVerzeichnis == "":
-        gdtImportVerzeichnis = os.getcwd()
-    gdtExportVerzeichnis = configIni["Verzeichnisse"]["gdtexport"]
-    if gdtExportVerzeichnis == "":
-        gdtExportVerzeichnis = os.getcwd()
-    benutzernamen = configIni["Benutzer"]["namen"].split("::")
-    benutzerkuerzel = configIni["Benutzer"]["kuerzel"].split("::")
-    aktuelleBenuztzernummer = 0
-    version = configIni["Allgemein"]["version"]
-    dokuVerzeichnis = configIni["Allgemein"]["dokuverzeichnis"]
-    vorherigeDokuLaden = (configIni["Allgemein"]["vorherigedokuladen"] == "1")
-    z = configIni["GDT"]["zeichensatz"]
-    zeichensatz = gdt.GdtZeichensatz.IBM_CP437
-    if z == "1":
-        zeichensatz = gdt.GdtZeichensatz.BIT_7
-    elif z == "3":
-        zeichensatz = gdt.GdtZeichensatz.ANSI_CP1252
 
     # Mainwindow zentrieren
     def resizeEvent(self, e):
@@ -94,6 +98,65 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        # config.ini lesen
+        updateSafePath = ""
+        if sys.platform == "win32":
+            updateSafePath = os.path.expanduser("~/appdata/local/gerigdt")
+        else:
+            updateSafePath = os.path.expanduser("~/.config/gerigdt")
+        self.configPath = updateSafePath
+        self.configIni = configparser.ConfigParser()
+        if os.path.exists(os.path.join(updateSafePath, "config.ini")):
+            self.onfigPath = updateSafePath
+        elif os.path.exists(os.path.join(basedir, "config.ini")):
+            try:
+                if (not os.path.exists(updateSafePath)):
+                    os.makedirs(updateSafePath, 0o777)
+                shutil.copy(os.path.join(basedir, "config.ini"), updateSafePath)
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Die Konfigurationsdatei config.ini wurde nach " + updateSafePath + " kopiert um sie vor Überschreiben bei einem Update zu schützen.", QMessageBox.StandardButton.Ok)
+                mb.exec()
+                self.configPath = updateSafePath
+            except:
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Problem beim Kopieren der Konfigurationsdatei. GeriGDT wird mit Standardeinstellungen gestartet.", QMessageBox.StandardButton.Ok)
+                mb.exec()
+                self.configPath = basedir
+        else:
+            mb = QMessageBox(QMessageBox.Icon.Critical, "Hinweis", "Die Konfigurationsdatei config.ini fehlt. GeriGDT kann nicht gestartet werden.", QMessageBox.StandardButton.Ok)
+            mb.exec()
+            app.quit()
+        self.configIni.read(os.path.join(self.configPath, "config.ini"))
+        self.gdtImportVerzeichnis = self.configIni["Verzeichnisse"]["gdtimport"]
+        if self.gdtImportVerzeichnis == "":
+            self.gdtImportVerzeichnis = os.getcwd()
+        self.gdtExportVerzeichnis = self.configIni["Verzeichnisse"]["gdtexport"]
+        if self.gdtExportVerzeichnis == "":
+            self.gdtExportVerzeichnis = os.getcwd()
+        self.benutzernamen = self.configIni["Benutzer"]["namen"].split("::")
+        self.benutzerkuerzel = self.configIni["Benutzer"]["kuerzel"].split("::")
+        self.aktuelleBenuztzernummer = 0
+        self.version = self.configIni["Allgemein"]["version"]
+        self.dokuVerzeichnis = self.configIni["Allgemein"]["dokuverzeichnis"]
+        self.vorherigeDokuLaden = (self.configIni["Allgemein"]["vorherigedokuladen"] == "1")
+        z = self.configIni["GDT"]["zeichensatz"]
+        self.zeichensatz = gdt.GdtZeichensatz.IBM_CP437
+        if z == "1":
+            self.zeichensatz = gdt.GdtZeichensatz.BIT_7
+        elif z == "3":
+            self.zeichensatz = gdt.GdtZeichensatz.ANSI_CP1252
+
+        # Version vergleichen und gegebenenfalls aktualisieren
+        configIniBase = configparser.ConfigParser()
+        try:
+            configIniBase.read(os.path.join(basedir, "config.ini"))
+            if versionVeraltet(self.version, configIniBase["Allgemein"]["version"]):
+                self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
+                with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                    self.configIni.write(configfile)
+                    self.version = self.configIni["Allgemein"]["version"]
+        except:
+            raise
+
         jahr = datetime.datetime.now().year
         copyrightJahre = "2023"
         if jahr > 2023:
@@ -463,14 +526,13 @@ class MainWindow(QMainWindow):
         self.aktuelleBenuztzernummer = self.dokuvonComboBox.currentIndex()
 
     def einstellungenAllgemein(self):
-        de = dialogEinstellungenAllgemein.EinstellungenAllgemein()
+        de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)
         if de.exec() == 1:
-            self.configIni["Allgemein"]["dokuverzeichnis"] = de.lineEditArchivierungsverzeichnis.text()
             if de.checkboxVorherigeDokuLaden.isChecked():
                 self.configIni["Allgemein"]["vorherigedokuladen"] = "1"
             else:
                 self.configIni["Allgemein"]["vorherigedokuladen"] = "0"
-            with open(os.path.join(basedir, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
@@ -480,7 +542,7 @@ class MainWindow(QMainWindow):
                     app.quit()
 
     def einstellungenGdt(self):
-        de = dialogEinstellungenGdt.EinstellungenGdt()
+        de = dialogEinstellungenGdt.EinstellungenGdt(self.configPath)
         if de.exec() == 1:
             self.configIni["GDT"]["idgerigdt"] = de.lineEditGeriGdtId.text()
             self.configIni["GDT"]["idpraxisedv"] = de.lineEditPraxisEdvId.text()
@@ -489,7 +551,7 @@ class MainWindow(QMainWindow):
             self.configIni["GDT"]["kuerzelgerigdt"] = de.lineEditGeriGdtKuerzel.text()
             self.configIni["GDT"]["kuerzelpraxisedv"] = de.lineEditPraxisEdvKuerzel.text()
             self.configIni["GDT"]["zeichensatz"] = str(de.aktuelleZeichensatznummer + 1)
-            with open(os.path.join(basedir, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
@@ -499,7 +561,7 @@ class MainWindow(QMainWindow):
                     app.quit()
 
     def einstellungenBenutzer(self):
-        de = dialogEinstellungenBenutzer.EinstellungenBenutzer()
+        de = dialogEinstellungenBenutzer.EinstellungenBenutzer(self.configPath)
         if de.exec() == 1:
             namen = []
             kuerzel = []
@@ -509,7 +571,7 @@ class MainWindow(QMainWindow):
                     kuerzel.append(de.lineEditKuerzel[i].text())
             self.configIni["Benutzer"]["namen"] = "::".join(namen)
             self.configIni["Benutzer"]["kuerzel"] = "::".join(kuerzel)
-            with open(os.path.join(basedir, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen in der Benutzerverwaltung wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)

@@ -10,15 +10,13 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 
-basedir = os.path.dirname(__file__)
-
 class EinstellungenBenutzer(QDialog):
-    def __init__(self):
+    def __init__(self, configPath):
         super().__init__()
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
-        configIni.read(os.path.join(basedir, "config.ini"))
+        configIni.read(os.path.join(configPath, "config.ini"))
         self.benutzernamen = (configIni["Benutzer"]["namen"]).split("::")
         self.benutzerkuerzel = (configIni["Benutzer"]["kuerzel"]).split("::")
 

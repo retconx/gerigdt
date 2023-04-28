@@ -12,15 +12,13 @@ from PySide6.QtWidgets import (
     QFileDialog,
 )
 
-basedir = os.path.dirname(__file__)
-
 class EinstellungenAllgemein(QDialog):
-    def __init__(self):
+    def __init__(self, configPath):
         super().__init__()
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
-        configIni.read(os.path.join(basedir, "config.ini"))
+        configIni.read(os.path.join(configPath, "config.ini"))
         self.version = configIni["Allgemein"]["version"]
         self.releasedatum = configIni["Allgemein"]["releasedatum"]
         self.dokuverzeichnis = configIni["Allgemein"]["dokuverzeichnis"]
@@ -29,11 +27,25 @@ class EinstellungenAllgemein(QDialog):
         self.setWindowTitle("Allgemeine Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
+        self.buttonBox.accepted.connect(self.accept) # type: ignore
+        self.buttonBox.rejected.connect(self.reject) # type: ignore
 
         dialogLayoutV = QVBoxLayout()
-        groupboxLayoutG = QGridLayout()
+        # # Groupbox Konfigurationsverzeichnis
+        # groupboxKonfigurationsverzeichnis = QGroupBox("Konfigurationsverzeichnis")
+        # groupboxKonfigurationsverzeichnis.setStyleSheet("font-weight:bold")
+        # labelConfigIniSpeichernIn = QLabel("config.ini speichern in:")
+        # labelConfigIniSpeichernIn.setStyleSheet("font-weight:normal")
+        # self.lineEditKonfigurationsverzeichnis= QLineEdit(self.dokuverzeichnis)
+        # self.lineEditKonfigurationsverzeichnis.setStyleSheet("font-weight:normal")
+        # buttonDurchsuchenKonfigurationsverzeichnis = QPushButton("Durchsuchen")
+        # buttonDurchsuchenKonfigurationsverzeichnis.setStyleSheet("font-weight:normal")
+        # buttonDurchsuchenKonfigurationsverzeichnis.clicked.connect(self.durchsuchenKonfigurationsverzeichnis) # type: ignore
+        # groupboxLayoutKonfigurationsverzeichnis = QGridLayout()
+        # groupboxLayoutKonfigurationsverzeichnis.addWidget(labelConfigIniSpeichernIn, 0, 0, 1, 2)
+        # groupboxLayoutKonfigurationsverzeichnis.addWidget(self.lineEditKonfigurationsverzeichnis, 1, 0)
+        # groupboxLayoutKonfigurationsverzeichnis.addWidget(buttonDurchsuchenKonfigurationsverzeichnis, 1, 1)
+        # groupboxKonfigurationsverzeichnis.setLayout(groupboxLayoutKonfigurationsverzeichnis)
         # Groupbox Dokumentationsverwaltung
         groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
         groupboxDokumentationsverwaltung.setStyleSheet("font-weight:bold")
@@ -43,24 +55,29 @@ class EinstellungenAllgemein(QDialog):
         self.lineEditArchivierungsverzeichnis.setStyleSheet("font-weight:normal")
         buttonDurchsuchenArchivierungsverzeichnis = QPushButton("Durchsuchen")
         buttonDurchsuchenArchivierungsverzeichnis.setStyleSheet("font-weight:normal")
-        buttonDurchsuchenArchivierungsverzeichnis.clicked.connect(self.durchsuchenArchivierungsverzeichnis)
-        groupboxLayoutG.addWidget(labelArchivierungsverzeichnis, 0, 0, 1, 2)
-        groupboxLayoutG.addWidget(self.lineEditArchivierungsverzeichnis, 1, 0)
-        groupboxLayoutG.addWidget(buttonDurchsuchenArchivierungsverzeichnis, 1, 1)
+        buttonDurchsuchenArchivierungsverzeichnis.clicked.connect(self.durchsuchenArchivierungsverzeichnis) # type: ignore
+        groupboxLayoutArchivierungsverzeichnis = QGridLayout()
+        groupboxLayoutArchivierungsverzeichnis.addWidget(labelArchivierungsverzeichnis, 0, 0, 1, 2)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(self.lineEditArchivierungsverzeichnis, 1, 0)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(buttonDurchsuchenArchivierungsverzeichnis, 1, 1)
         labelVorherigeDokuLaden = QLabel("Vorherige Dokumentation laden (falls vorhanden)")
         labelVorherigeDokuLaden.setStyleSheet("font-weight:normal")
         self.checkboxVorherigeDokuLaden = QCheckBox()
-        groupboxLayoutG.addWidget(labelVorherigeDokuLaden, 2, 0)
-        groupboxLayoutG.addWidget(self.checkboxVorherigeDokuLaden, 2, 1)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(labelVorherigeDokuLaden, 2, 0)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(self.checkboxVorherigeDokuLaden, 2, 1)
         self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
-        groupboxDokumentationsverwaltung.setLayout(groupboxLayoutG)
+        groupboxDokumentationsverwaltung.setLayout(groupboxLayoutArchivierungsverzeichnis)
 
+        # dialogLayoutV.addWidget(groupboxKonfigurationsverzeichnis)
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
         dialogLayoutV.addWidget(self.buttonBox)
         dialogLayoutV.setContentsMargins(10, 10, 10, 10)
         dialogLayoutV.setSpacing(20)
         self.setLayout(dialogLayoutV)
 
+    def durchsuchenKonfigurationsverzeichnis(self):
+        pass
+    
     def durchsuchenArchivierungsverzeichnis(self):
         fd = QFileDialog(self)
         fd.setFileMode(QFileDialog.FileMode.Directory)
