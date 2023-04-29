@@ -1,4 +1,4 @@
-import configparser, os
+import configparser, os, lizenzschluessel
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -32,7 +32,7 @@ class EinstellungenAllgemein(QDialog):
 
         dialogLayoutV = QVBoxLayout()
         # Groupbox Dokumentationsverwaltung
-        groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
+        groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung (Lizenz erforderlich)")
         groupboxDokumentationsverwaltung.setStyleSheet("font-weight:bold")
         labelArchivierungsverzeichnis = QLabel("Archivierungsverzeichnis:")
         labelArchivierungsverzeichnis.setStyleSheet("font-weight:normal")
@@ -48,9 +48,14 @@ class EinstellungenAllgemein(QDialog):
         labelVorherigeDokuLaden = QLabel("Vorherige Dokumentation laden (falls vorhanden)")
         labelVorherigeDokuLaden.setStyleSheet("font-weight:normal")
         self.checkboxVorherigeDokuLaden = QCheckBox()
+        self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
+        if not lizenzschluessel.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], lizenzschluessel.SoftwareId.GERIGDT):
+            groupboxDokumentationsverwaltung.setEnabled(False)
+            self.lineEditArchivierungsverzeichnis.setText("")
+            self.checkboxVorherigeDokuLaden.setChecked(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
         groupboxLayoutArchivierungsverzeichnis.addWidget(labelVorherigeDokuLaden, 2, 0)
         groupboxLayoutArchivierungsverzeichnis.addWidget(self.checkboxVorherigeDokuLaden, 2, 1)
-        self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
         groupboxDokumentationsverwaltung.setLayout(groupboxLayoutArchivierungsverzeichnis)
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
@@ -58,9 +63,6 @@ class EinstellungenAllgemein(QDialog):
         dialogLayoutV.setContentsMargins(10, 10, 10, 10)
         dialogLayoutV.setSpacing(20)
         self.setLayout(dialogLayoutV)
-
-    def durchsuchenKonfigurationsverzeichnis(self):
-        pass
     
     def durchsuchenArchivierungsverzeichnis(self):
         fd = QFileDialog(self)

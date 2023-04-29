@@ -1,6 +1,6 @@
 import sys, configparser, os, datetime, shutil
-import gdt, gdtzeile
-import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenProgrammerweiterungen
+import gdt, gdtzeile, lizenzschluessel
+import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel
 
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QLocale
 from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon
@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 basedir = os.path.dirname(__file__)
+print(lizenzschluessel.GdtToolsLizenzschluessel.erzeugeLs("119885203", lizenzschluessel.Gueltigkeit.UNBEFRISTET, lizenzschluessel.SoftwareId.GERIGDT, "30042023"))
 
 def versionVeraltet(versionAktuell:str, versionVergleich:str):
     """
@@ -36,7 +37,7 @@ def versionVeraltet(versionAktuell:str, versionVergleich:str):
     hunderterBase = int(versionVergleich.split(".")[0])
     zehnerBase = int(versionVergleich.split(".")[1])
     einserBase = int(versionVergleich.split(".")[2])
-    hunderter = int(versionAktuell.split(".")[2])
+    hunderter = int(versionAktuell.split(".")[0])
     zehner = int(versionAktuell.split(".")[1])
     einser = int(versionAktuell.split(".")[2])
     if hunderterBase > hunderter:
@@ -144,8 +145,6 @@ class MainWindow(QMainWindow):
             self.zeichensatz = gdt.GdtZeichensatz.BIT_7
         elif z == "3":
             self.zeichensatz = gdt.GdtZeichensatz.ANSI_CP1252
-        self.lanr = self.configIni["Erweiterungen"]["lanr"]
-        self.lizenzcode = self.configIni["Erweiterungen"]["lizenzcode"]
 
         # Version vergleichen und gegebenenfalls aktualisieren
         configIniBase = configparser.ConfigParser()
@@ -155,10 +154,13 @@ class MainWindow(QMainWindow):
                 self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
                 with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                     self.configIni.write(configfile)
-                    self.version = self.configIni["Allgemein"]["version"]
+                self.version = self.configIni["Allgemein"]["version"]
+                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "GeriGDT wurde erfolgreich auf Version " + self.version + " aktualisiert.", QMessageBox.StandardButton.Ok)
+                mb.exec()
         except:
-            raise
-
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"], QMessageBox.StandardButton.Ok)
+            mb.exec()
+        
         jahr = datetime.datetime.now().year
         copyrightJahre = "2023"
         if jahr > 2023:
@@ -459,9 +461,9 @@ class MainWindow(QMainWindow):
             einstellungenBenutzerAction = QAction("Benutzer verwalten", self)
             einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer) # type: ignore
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
-            einstellungenErweiterungenAction = QAction("Programmerweiterungen (Add-ons)", self)
+            einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
             einstellungenErweiterungenAction.triggered.connect(self.einstellungenProgrammerweiterungen) # type: ignore
-            einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+A"))
+            einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
             einstellungenMenu.addAction(einstellungenAllgemeinAction)
             einstellungenMenu.addAction(einstellungenGdtAction)
             einstellungenMenu.addAction(einstellungenBenutzerAction)
@@ -588,10 +590,10 @@ class MainWindow(QMainWindow):
                     app.quit()
 
     def einstellungenProgrammerweiterungen(self):
-        de = dialogEinstellungenProgrammerweiterungen.EinstellungenProgrammerweiterungen(self.configPath)
+        de = dialogEinstellungenLanrLizenzschluessel.EinstellungenProgrammerweiterungen(self.configPath)
         if de.exec() == 1:
             self.configIni["Erweiterungen"]["lanr"] = de.lineEditLanr.text()
-            self.configIni["Erweiterungen"]["lizenzcode"] = de.lineEditLizenzcode.text()
+            self.configIni["Erweiterungen"]["lizenzschluessel"] = de.lineEditLizenzschluessel.text()
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
