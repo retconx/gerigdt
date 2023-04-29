@@ -1,6 +1,6 @@
 import sys, configparser, os, datetime, shutil
 import gdt, gdtzeile
-import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein
+import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenProgrammerweiterungen
 
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QLocale
 from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon
@@ -144,6 +144,8 @@ class MainWindow(QMainWindow):
             self.zeichensatz = gdt.GdtZeichensatz.BIT_7
         elif z == "3":
             self.zeichensatz = gdt.GdtZeichensatz.ANSI_CP1252
+        self.lanr = self.configIni["Erweiterungen"]["lanr"]
+        self.lizenzcode = self.configIni["Erweiterungen"]["lizenzcode"]
 
         # Version vergleichen und gegebenenfalls aktualisieren
         configIniBase = configparser.ConfigParser()
@@ -457,9 +459,13 @@ class MainWindow(QMainWindow):
             einstellungenBenutzerAction = QAction("Benutzer verwalten", self)
             einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer) # type: ignore
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
+            einstellungenErweiterungenAction = QAction("Programmerweiterungen (Add-ons)", self)
+            einstellungenErweiterungenAction.triggered.connect(self.einstellungenProgrammerweiterungen) # type: ignore
+            einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+A"))
             einstellungenMenu.addAction(einstellungenAllgemeinAction)
             einstellungenMenu.addAction(einstellungenGdtAction)
             einstellungenMenu.addAction(einstellungenBenutzerAction)
+            einstellungenMenu.addAction(einstellungenErweiterungenAction)
         else:
             sys.exit()
 
@@ -575,6 +581,20 @@ class MainWindow(QMainWindow):
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen in der Benutzerverwaltung wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                if mb.exec() == QMessageBox.StandardButton.Yes:
+                    app.quit()
+
+    def einstellungenProgrammerweiterungen(self):
+        de = dialogEinstellungenProgrammerweiterungen.EinstellungenProgrammerweiterungen(self.configPath)
+        if de.exec() == 1:
+            self.configIni["Erweiterungen"]["lanr"] = de.lineEditLanr.text()
+            self.configIni["Erweiterungen"]["lizenzcode"] = de.lineEditLizenzcode.text()
+            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                self.configIni.write(configfile)
+                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
                 mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
                 mb.button(QMessageBox.StandardButton.No).setText("Nein")

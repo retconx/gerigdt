@@ -38,8 +38,8 @@ class EinstellungenGdt(QDialog):
         self.setWindowTitle("GDT-Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
+        self.buttonBox.accepted.connect(self.accept) # type:ignore
+        self.buttonBox.rejected.connect(self.reject) # type:ignore
 
         dialogLayoutV = QVBoxLayout()
         groupboxLayoutH = QHBoxLayout()
@@ -74,10 +74,10 @@ class EinstellungenGdt(QDialog):
         self.lineEditExport.setStyleSheet("font-weight:normal")
         buttonDurchsuchenImport = QPushButton("Durchsuchen")
         buttonDurchsuchenImport.setStyleSheet("font-weight:normal")
-        buttonDurchsuchenImport.clicked.connect(self.durchsuchenImport)
+        buttonDurchsuchenImport.clicked.connect(self.durchsuchenImport) # type:ignore
         buttonDurchsuchenExport = QPushButton("Durchsuchen")
         buttonDurchsuchenExport.setStyleSheet("font-weight:normal")
-        buttonDurchsuchenExport.clicked.connect(self.durchsuchenExport)
+        buttonDurchsuchenExport.clicked.connect(self.durchsuchenExport) # type:ignore
         groupboxLayoutG.addWidget(labelImport, 0, 0, 1, 2)
         groupboxLayoutG.addWidget(self.lineEditImport, 1, 0)
         groupboxLayoutG.addWidget(buttonDurchsuchenImport, 1, 1)
@@ -94,11 +94,11 @@ class EinstellungenGdt(QDialog):
         labelPraxisEdvKuerzel = QLabel("Praxis-EDV:")
         labelPraxisEdvKuerzel.setStyleSheet("font-weight:normal")
         self.lineEditGeriGdtKuerzel = QLineEdit(self.kuerzeltGeriGdt)
-        self.lineEditGeriGdtKuerzel.textChanged.connect(self.kuerzelGeaendert)
+        self.lineEditGeriGdtKuerzel.textChanged.connect(self.kuerzelGeaendert) # type:ignore
         self.lineEditGeriGdtKuerzel.setStyleSheet("font-weight:normal")
         self.lineEditGeriGdtKuerzel.setEnabled(False)
         self.lineEditPraxisEdvKuerzel = QLineEdit(self.kuerzeltPraxisEdv)
-        self.lineEditPraxisEdvKuerzel.textChanged.connect(self.kuerzelGeaendert)
+        self.lineEditPraxisEdvKuerzel.textChanged.connect(self.kuerzelGeaendert) # type:ignore
         self.lineEditPraxisEdvKuerzel.setStyleSheet("font-weight:normal")
         self.labelImportDateiname = QLabel("Import-Dateiname: " + self.lineEditGeriGdtKuerzel.text() + self.lineEditPraxisEdvKuerzel.text() + ".gdt")
         self.labelImportDateiname.setStyleSheet("font-weight:normal")
@@ -112,7 +112,7 @@ class EinstellungenGdt(QDialog):
         groupboxLayoutG.addWidget(self.labelExportDateiname, 2, 0, 1, 4)
         groupboxKuerzel.setLayout(groupboxLayoutG)
         # Groupbox Zeichensatz
-        groupboxLayoutZeichensatz = QHBoxLayout()
+        groupboxLayoutZeichensatz = QVBoxLayout()
         groupboxZeichensatz = QGroupBox("Zeichensatz")
         groupboxZeichensatz.setStyleSheet("font-weight:bold")
         self.combobxZeichensatz = QComboBox()
@@ -120,7 +120,7 @@ class EinstellungenGdt(QDialog):
             self.combobxZeichensatz.addItem(zs)
         self.combobxZeichensatz.setStyleSheet("font-weight:normal")
         self.combobxZeichensatz.setCurrentIndex(self.aktuelleZeichensatznummer)
-        self.combobxZeichensatz.currentIndexChanged.connect(self.zeichensatzGewechselt)
+        self.combobxZeichensatz.currentIndexChanged.connect(self.zeichensatzGewechselt) # type:ignore
         groupboxLayoutZeichensatz.addWidget(self.combobxZeichensatz)
         groupboxZeichensatz.setLayout(groupboxLayoutZeichensatz)
 
