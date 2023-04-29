@@ -31,6 +31,7 @@ class EinstellungenAllgemein(QDialog):
         self.buttonBox.rejected.connect(self.reject) # type: ignore
 
         dialogLayoutV = QVBoxLayout()
+        # Groupbox Dokumentationsverwaltung
         groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
         groupboxDokumentationsverwaltung.setStyleSheet("font-weight:bold")
         labelArchivierungsverzeichnis = QLabel("Archivierungsverzeichnis:")
@@ -52,7 +53,6 @@ class EinstellungenAllgemein(QDialog):
         self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
         groupboxDokumentationsverwaltung.setLayout(groupboxLayoutArchivierungsverzeichnis)
 
-        # dialogLayoutV.addWidget(groupboxKonfigurationsverzeichnis)
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
         dialogLayoutV.addWidget(self.buttonBox)
         dialogLayoutV.setContentsMargins(10, 10, 10, 10)

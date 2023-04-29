@@ -126,10 +126,10 @@ class MainWindow(QMainWindow):
             mb.exec()
             app.quit()
         self.configIni.read(os.path.join(self.configPath, "config.ini"))
-        self.gdtImportVerzeichnis = self.configIni["Verzeichnisse"]["gdtimport"]
+        self.gdtImportVerzeichnis = self.configIni["GDT"]["gdtimportverzeichnis"]
         if self.gdtImportVerzeichnis == "":
             self.gdtImportVerzeichnis = os.getcwd()
-        self.gdtExportVerzeichnis = self.configIni["Verzeichnisse"]["gdtexport"]
+        self.gdtExportVerzeichnis = self.configIni["GDT"]["gdtexportverzeichnis"]
         if self.gdtExportVerzeichnis == "":
             self.gdtExportVerzeichnis = os.getcwd()
         self.benutzernamen = self.configIni["Benutzer"]["namen"].split("::")
@@ -547,8 +547,8 @@ class MainWindow(QMainWindow):
         if de.exec() == 1:
             self.configIni["GDT"]["idgerigdt"] = de.lineEditGeriGdtId.text()
             self.configIni["GDT"]["idpraxisedv"] = de.lineEditPraxisEdvId.text()
-            self.configIni["Verzeichnisse"]["gdtimport"] = de.lineEditImport.text()
-            self.configIni["Verzeichnisse"]["gdtexport"] = de.lineEditExport.text()
+            self.configIni["GDT"]["gdtimportverzeichnis"] = de.lineEditImport.text()
+            self.configIni["GDT"]["gdtexportverzeichnis"] = de.lineEditExport.text()
             self.configIni["GDT"]["kuerzelgerigdt"] = de.lineEditGeriGdtKuerzel.text()
             self.configIni["GDT"]["kuerzelpraxisedv"] = de.lineEditPraxisEdvKuerzel.text()
             self.configIni["GDT"]["zeichensatz"] = str(de.aktuelleZeichensatznummer + 1)
