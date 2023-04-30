@@ -1,4 +1,5 @@
 import configparser, os, re
+import gdttoolsL
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -8,6 +9,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 
+reLanr = "^\\d{9}$"
 reLizenzschluessel = "^([A-Z0-9]{5}-){4}[A-F0-9]{5}$"
 
 class EinstellungenProgrammerweiterungen(QDialog):
@@ -54,13 +56,13 @@ class EinstellungenProgrammerweiterungen(QDialog):
         self.lineEditLanr.selectAll()
 
     def accept(self):
-        if len(self.lineEditLanr.text()) != 9:
+        if not re.match(reLanr, self.lineEditLanr.text()) or not gdttoolsL.GdtToolsLizenzschluessel.checksummeLanrKorrekt(self.lineEditLanr.text()):
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLanr.setFocus()
             self.lineEditLanr.selectAll()
-        elif not re.match(reLizenzschluessel, self.lineEditLizenzschluessel.text()):
-            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Der lizenzschluessel ist ungültig.", QMessageBox.StandardButton.Ok)
+        elif not re.match(reLizenzschluessel, self.lineEditLizenzschluessel.text()) or not gdttoolsL.GdtToolsLizenzschluessel.lanrGueltig(self.lineEditLanr.text(), self.lineEditLizenzschluessel.text()):
+            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR/lizenzschluessel-Kombination ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLizenzschluessel.setFocus()
             self.lineEditLizenzschluessel.selectAll()

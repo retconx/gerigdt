@@ -1,4 +1,4 @@
-import configparser, os, lizenzschluessel
+import configparser, os, gdttoolsL
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -32,8 +32,11 @@ class EinstellungenAllgemein(QDialog):
 
         dialogLayoutV = QVBoxLayout()
         # Groupbox Dokumentationsverwaltung
-        groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung (Lizenz erforderlich)")
+        groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
         groupboxDokumentationsverwaltung.setStyleSheet("font-weight:bold")
+        labelKeineRegistrierung = QLabel("Für diese Funktion ist eine gültige LANR/Lizenzschlüsselkombination erforderlich.")
+        labelKeineRegistrierung.setStyleSheet("font-weight:normal;color:rgb(0,0,200)")
+        labelKeineRegistrierung.setVisible(False)
         labelArchivierungsverzeichnis = QLabel("Archivierungsverzeichnis:")
         labelArchivierungsverzeichnis.setStyleSheet("font-weight:normal")
         self.lineEditArchivierungsverzeichnis= QLineEdit(self.dokuverzeichnis)
@@ -42,20 +45,22 @@ class EinstellungenAllgemein(QDialog):
         buttonDurchsuchenArchivierungsverzeichnis.setStyleSheet("font-weight:normal")
         buttonDurchsuchenArchivierungsverzeichnis.clicked.connect(self.durchsuchenArchivierungsverzeichnis) # type: ignore
         groupboxLayoutArchivierungsverzeichnis = QGridLayout()
-        groupboxLayoutArchivierungsverzeichnis.addWidget(labelArchivierungsverzeichnis, 0, 0, 1, 2)
-        groupboxLayoutArchivierungsverzeichnis.addWidget(self.lineEditArchivierungsverzeichnis, 1, 0)
-        groupboxLayoutArchivierungsverzeichnis.addWidget(buttonDurchsuchenArchivierungsverzeichnis, 1, 1)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(labelKeineRegistrierung, 0, 0, 1, 2)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(labelArchivierungsverzeichnis, 1, 0, 1, 2)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(self.lineEditArchivierungsverzeichnis, 2, 0)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(buttonDurchsuchenArchivierungsverzeichnis, 2, 1)
         labelVorherigeDokuLaden = QLabel("Vorherige Dokumentation laden (falls vorhanden)")
         labelVorherigeDokuLaden.setStyleSheet("font-weight:normal")
         self.checkboxVorherigeDokuLaden = QCheckBox()
         self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
-        if not lizenzschluessel.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], lizenzschluessel.SoftwareId.GERIGDT):
+        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
+            labelKeineRegistrierung.setVisible(True)
             groupboxDokumentationsverwaltung.setEnabled(False)
             self.lineEditArchivierungsverzeichnis.setText("")
             self.checkboxVorherigeDokuLaden.setChecked(False)
             self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
-        groupboxLayoutArchivierungsverzeichnis.addWidget(labelVorherigeDokuLaden, 2, 0)
-        groupboxLayoutArchivierungsverzeichnis.addWidget(self.checkboxVorherigeDokuLaden, 2, 1)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(labelVorherigeDokuLaden, 3, 0)
+        groupboxLayoutArchivierungsverzeichnis.addWidget(self.checkboxVorherigeDokuLaden, 3, 1)
         groupboxDokumentationsverwaltung.setLayout(groupboxLayoutArchivierungsverzeichnis)
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
@@ -75,17 +80,3 @@ class EinstellungenAllgemein(QDialog):
         if fd.exec() == 1:
             self.dokuverzeichnis = fd.directory()
             self.lineEditArchivierungsverzeichnis.setText(fd.directory().path())
-
-    # def accept(self):
-    #     if len(self.lineEditPraxisEdvId.text()) != 8:
-    #         mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die GDT-ID muss aus acht Zeichen bestehen.", QMessageBox.StandardButton.Ok)
-    #         mb.exec()
-    #         self.lineEditPraxisEdvId.setFocus()
-    #         self.lineEditPraxisEdvId.selectAll()
-    #     elif len(self.lineEditPraxisEdvKuerzel.text()) != 4:
-    #         mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Das Kürzel für Austauschdateien muss aus vier Zeichen bestehen.", QMessageBox.StandardButton.Ok)
-    #         mb.exec()
-    #         self.lineEditPraxisEdvKuerzel.setFocus()
-    #         self.lineEditPraxisEdvKuerzel.selectAll()
-    #     else:
-    #         self.done(1)

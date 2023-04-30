@@ -1,5 +1,5 @@
 import sys, configparser, os, datetime, shutil
-import gdt, gdtzeile, lizenzschluessel
+import gdt, gdtzeile, gdttoolsL
 import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel
 
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QLocale
@@ -22,7 +22,6 @@ from PySide6.QtWidgets import (
 )
 
 basedir = os.path.dirname(__file__)
-print(lizenzschluessel.GdtToolsLizenzschluessel.erzeugeLs("119885203", lizenzschluessel.Gueltigkeit.UNBEFRISTET, lizenzschluessel.SoftwareId.GERIGDT, "30042023"))
 
 def versionVeraltet(versionAktuell:str, versionVergleich:str):
     """

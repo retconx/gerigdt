@@ -17,66 +17,6 @@ checksummestellen = [9, 10, 11]
 
 class GdtToolsLizenzschluessel:
     @staticmethod
-    def erzeugeLs(lanr:str, gueltigkeit:Gueltigkeit, softwareId:SoftwareId, erstellungsdatum:str):
-        """
-        Erzeugt einen Lizenzschlüssel
-        Parameter:
-            lanr:str
-            gueltigkeit:Gueltigkeit
-            softwareId:SoftwareId
-            erstellungsdatum:str (TTMMYYYY)
-        Rückgabe:
-            Lizenzschlüssel
-        """
-        ls = []
-        lsFormatiert = ""
-        for i in range(25):
-            ls.append("X")
-        # LANR (5, 16)
-        lanrQuersumme = 0
-        for ziffer in lanr:
-            lanrQuersumme += int(ziffer)
-        lanrQuersummeHex = hex(lanrQuersumme)[2:].upper()
-        ls[4] = lanrQuersummeHex[0]
-        ls[15] = lanrQuersummeHex[1]
-        # Gültigkeit (7)
-        ls[6] = gueltigkeit.value
-        # Software-ID
-        ls[20] = softwareId.value
-        # Erstellungsdatum
-        datumHex = "{:07X}".format(int(erstellungsdatum))
-        i = 0
-        for stelle in datumstellen:
-            ls[stelle] = datumHex[i]
-            i += 1
-        # Restliche Stellen zufällig
-        i = 0
-        for stelle in reststellen:
-            ls[stelle] = hex(random.randint(0,15))[2:].upper()
-            i += 1
-        # Checksumme berechnen
-        checksumme = 0
-        i = 0
-        for stelle in ls:
-            if i < 9 or i > 11:
-                checksumme += ord(stelle)
-            i += 1
-        checksummeHex = "{:02X}".format(checksumme)
-        i = 0
-        for stelle in checksummestellen:
-            ls[stelle] = checksummeHex[i]
-            i += 1
-            
-        # Lizenzschlüssel formatieren
-        i = 1
-        for stelle in ls:
-            lsFormatiert += stelle
-            if i % 5 == 0 and i < len(ls):
-                lsFormatiert += "-"
-            i += 1
-        return lsFormatiert
-    
-    @staticmethod
     def lanrGueltig(lanr:str, lizenzschluessel:str):
         """Prüft eine LANR/Lizenzschlüsselkombination auf Gültigkeit
         Parameter:
@@ -156,13 +96,20 @@ class GdtToolsLizenzschluessel:
     
     @staticmethod
     def gueltigBis(lizenzschluessel:str):
+        """
+        Gibt das maximale Gültigkeitsdatum eines Lizenzschlüssels zurück
+        Parameter: 
+            Lizenzschlüssel: str (XXXXX-XXXXX-XXXXX-XXXXX-XXXXX)
+        Rückgabe:
+            Gültigkeitsdatum:datetime.date (01.01.1900, wenn unbefristet)
+        """
         erstellungsdatumTTMMJJJJ = str(GdtToolsLizenzschluessel.getErstellungsdatum(lizenzschluessel))
         erstellungstag = int(erstellungsdatumTTMMJJJJ[0:2])
         erstellungsmonat = int(erstellungsdatumTTMMJJJJ[2:4])
         erstellungsjahr = int(erstellungsdatumTTMMJJJJ[4:])
         erstellungsdatum = datetime.date(erstellungsjahr, erstellungsmonat, erstellungstag)
         gueltigkeit = GdtToolsLizenzschluessel.getGueltigkeitsdauer(lizenzschluessel)
-        gueltigBis = None
+        gueltigBis = datetime.date(1900, 1, 1)
         if gueltigkeit == Gueltigkeit.DREISSIGTAGE:
             gueltigBis = erstellungsdatum + datetime.timedelta(days=30)
         elif gueltigkeit == Gueltigkeit.SECHSMONATE:
@@ -173,12 +120,48 @@ class GdtToolsLizenzschluessel:
     
     @staticmethod
     def heuteGueltig(lizenzschluessel:str):
+        """
+        Prüft, ob ein Lizenzschlüssel heute gültig ist
+        Parameter: 
+            Lizenzschlüssel: str (XXXXX-XXXXX-XXXXX-XXXXX-XXXXX)
+        Rückgabe:
+            True oder False
+        """
         heute = datetime.date.today()
-        if GdtToolsLizenzschluessel.gueltigBis(lizenzschluessel) == None:
+        if GdtToolsLizenzschluessel.gueltigBis(lizenzschluessel) == datetime.date(1900,1 ,1):
             return True
         return GdtToolsLizenzschluessel.gueltigBis(lizenzschluessel) >= heute
     
     @staticmethod
     def lizenzErteilt(lizenzschluessel:str, lanr:str, softwareId:SoftwareId):
+        """
+        Prüft ob: Checksumme eines Lizenzschlüssels korrekt, LANR zum Lizenzschlüssel passt, der Lizenzschlüssel heute gültig ist, die Software-ID korrekt ist
+        Parameter: 
+            Lizenzschlüssel: str (XXXXX-XXXXX-XXXXX-XXXXX-XXXXX)
+            LANR:str
+            softwareId:SoftwareId
+        """
         return lizenzschluessel != "" and lanr != "" and GdtToolsLizenzschluessel.checksummeKorrekt(lizenzschluessel) and GdtToolsLizenzschluessel.lanrGueltig(lanr, lizenzschluessel) and GdtToolsLizenzschluessel.heuteGueltig(lizenzschluessel) and GdtToolsLizenzschluessel.getSoftwareId(lizenzschluessel) == softwareId
+    
+    @staticmethod
+    def checksummeLanrKorrekt(lanr:str):
+        """
+        Prüft, die Checksume einer LANR
+        Parameter:
+            LANR:str
+        Rückgabe
+            True oder False
+        """
+        summe = 0
+        faktor = 4
+        for i in range(6):
+            summe += int(lanr[i]) * faktor
+            if faktor == 4:
+                faktor = 9
+            else:
+                faktor = 4
+        checksumme = 10 - (summe % 10)
+        if checksumme == 10:
+            checksumme = 0
+        return int(lanr[6]) == checksumme
 
