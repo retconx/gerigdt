@@ -102,7 +102,7 @@ class MainWindow(QMainWindow):
         # config.ini lesen
         updateSafePath = ""
         if sys.platform == "win32":
-            updateSafePath = os.path.expanduser("~/appdata/local/gerigdt")
+            updateSafePath = os.path.expanduser("~\\appdata\\local\\gerigdt")
         else:
             updateSafePath = os.path.expanduser("~/.config/gerigdt")
         self.configPath = updateSafePath
@@ -144,6 +144,8 @@ class MainWindow(QMainWindow):
             self.zeichensatz = gdt.GdtZeichensatz.BIT_7
         elif z == "3":
             self.zeichensatz = gdt.GdtZeichensatz.ANSI_CP1252
+        self.lanr = self.configIni["Erweiterungen"]["lanr"]
+        self.lizenzschluessel = self.configIni["Erweiterungen"]["lizenzschluessel"]
 
         # Version vergleichen und gegebenenfalls aktualisieren
         configIniBase = configparser.ConfigParser()
@@ -159,6 +161,9 @@ class MainWindow(QMainWindow):
         except:
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"], QMessageBox.StandardButton.Ok)
             mb.exec()
+
+        # Add-Ons freigeschaltet?
+        self.addOnsFreigeschaltet = gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lizenzschluessel, self.lanr, gdttoolsL.SoftwareId.GERIGDT)
         
         jahr = datetime.datetime.now().year
         copyrightJahre = "2023"
@@ -482,7 +487,7 @@ class MainWindow(QMainWindow):
             except IOError as e:
                 mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Fehler beim Lesen der vorherigen Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
                 mb.exec()
-        if doku != "":
+        if doku != "" and self.addOnsFreigeschaltet:
             # Untersuchungsdatum
             untdat = self.dokuZusammenfassungLesen(doku)[0]
             self.changeStatus(1, untdat.toString("dd.MM.yyyy"))

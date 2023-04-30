@@ -55,10 +55,8 @@ class EinstellungenAllgemein(QDialog):
         self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
         if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
             labelKeineRegistrierung.setVisible(True)
-            groupboxDokumentationsverwaltung.setEnabled(False)
-            self.lineEditArchivierungsverzeichnis.setText("")
+            self.checkboxVorherigeDokuLaden.setEnabled(False)
             self.checkboxVorherigeDokuLaden.setChecked(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
         groupboxLayoutArchivierungsverzeichnis.addWidget(labelVorherigeDokuLaden, 3, 0)
         groupboxLayoutArchivierungsverzeichnis.addWidget(self.checkboxVorherigeDokuLaden, 3, 1)
         groupboxDokumentationsverwaltung.setLayout(groupboxLayoutArchivierungsverzeichnis)
