@@ -127,11 +127,7 @@ class MainWindow(QMainWindow):
             app.quit()
         self.configIni.read(os.path.join(self.configPath, "config.ini"))
         self.gdtImportVerzeichnis = self.configIni["GDT"]["gdtimportverzeichnis"]
-        if self.gdtImportVerzeichnis == "":
-            self.gdtImportVerzeichnis = os.getcwd()
         self.gdtExportVerzeichnis = self.configIni["GDT"]["gdtexportverzeichnis"]
-        if self.gdtExportVerzeichnis == "":
-            self.gdtExportVerzeichnis = os.getcwd()
         self.benutzernamen = self.configIni["Benutzer"]["namen"].split("::")
         self.benutzerkuerzel = self.configIni["Benutzer"]["kuerzel"].split("::")
         self.aktuelleBenuztzernummer = 0
