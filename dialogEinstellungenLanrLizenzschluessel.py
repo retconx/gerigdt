@@ -56,7 +56,9 @@ class EinstellungenProgrammerweiterungen(QDialog):
         self.lineEditLanr.selectAll()
 
     def accept(self):
-        if not re.match(reLanr, self.lineEditLanr.text()) or not gdttoolsL.GdtToolsLizenzschluessel.checksummeLanrKorrekt(self.lineEditLanr.text()):
+        if self.lineEditLanr.text() == "" and self.lineEditLizenzschluessel.text() == "":
+            self.done(1)
+        elif not re.match(reLanr, self.lineEditLanr.text()) or not gdttoolsL.GdtToolsLizenzschluessel.checksummeLanrKorrekt(self.lineEditLanr.text()):
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLanr.setFocus()
