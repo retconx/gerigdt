@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
         name = "-"
         mbErg = QMessageBox.StandardButton.Yes
         try:
-            gd.laden(self.gdtImportVerzeichnis + "/GERIT2MD.gdt", self.zeichensatz)
+            gd.laden(self.gdtImportVerzeichnis + "/GERIT2MD.gdt", self.zeichensatz, self.configIni["GDT"]["idpraxisedv"])
             self.patId = str(gd.getInhalt("3000"))
             name = str(gd.getInhalt("3102")) + " " + str(gd.getInhalt("3101"))
         except (IOError, gdtzeile.GdtFehlerException) as e:

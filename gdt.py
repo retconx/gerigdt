@@ -279,13 +279,19 @@ class GdtDatei:
             return True
         except:
             return False
-    def laden(self, pfad:str, zeichensatz:GdtZeichensatz):
+    def laden(self, pfad:str, zeichensatz:GdtZeichensatz, senderId = None):
         """
         Lädt eine GDT-Datei
-            Exception:
-                IOError bei Ladefehler
-            Exception:
-                GdtFehlerException, wenn keine gültige GDT-Datei
+        Parameter:
+            pfad:str
+            zeichensatz:GdtZeichensatz
+            senderId:str (Optional)
+        Exception:
+            IOError bei Ladefehler
+        Exception:
+            GdtFehlerException, wenn keine gültige GDT-Datei
+        Exception:
+            GdtFehlerException, wenn senderId nicht übereinstimmt
         """
         self.gdtDatei.clear()
         if zeichensatz == GdtZeichensatz.BIT_7:
@@ -301,5 +307,7 @@ class GdtDatei:
                     self.gdtDatei.append(zeile.strip() + "\r\n")
             if not self.getSatzart():
                 raise gdtzeile.GdtFehlerException("Keine gültige GDT-Datei")
+            elif senderId and self.getInhalt("8316") != senderId:
+                raise gdtzeile.GdtFehlerException("Sender-ID ungültig")
         except IOError:
             raise
