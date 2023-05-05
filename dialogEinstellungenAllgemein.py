@@ -2,6 +2,7 @@ import configparser, os, gdttoolsL
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
+    QHBoxLayout,
     QVBoxLayout,
     QGridLayout,
     QGroupBox,
@@ -22,8 +23,9 @@ class EinstellungenAllgemein(QDialog):
         self.version = configIni["Allgemein"]["version"]
         self.releasedatum = configIni["Allgemein"]["releasedatum"]
         self.dokuverzeichnis = configIni["Allgemein"]["dokuverzeichnis"]
-        self.vorherigeDokuLaden = (configIni["Allgemein"]["vorherigedokuladen"] == "1")
-
+        self.vorherigeDokuLaden = configIni["Allgemein"]["vorherigedokuladen"] == "1"
+        self.pdferstellen = configIni["Allgemein"]["pdferstellen"] == "1"
+        self.bmiuebernehmen = configIni["Allgemein"]["bmiuebernehmen"] == "1"
         self.setWindowTitle("Allgemeine Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")
@@ -60,8 +62,36 @@ class EinstellungenAllgemein(QDialog):
         groupboxLayoutArchivierungsverzeichnis.addWidget(labelVorherigeDokuLaden, 3, 0)
         groupboxLayoutArchivierungsverzeichnis.addWidget(self.checkboxVorherigeDokuLaden, 3, 1)
         groupboxDokumentationsverwaltung.setLayout(groupboxLayoutArchivierungsverzeichnis)
+        # Groupbox PDF-Erstellung
+        groupboxPdfErstellung = QGroupBox("PDF-Erstellung")
+        groupboxPdfErstellung.setStyleSheet("font-weight:bold")
+        labelKeineRegistrierung = QLabel("Für diese Funktion ist eine gültige LANR/Lizenzschlüsselkombination erforderlich.")
+        labelKeineRegistrierung.setStyleSheet("font-weight:normal;color:rgb(0,0,200)")
+        labelKeineRegistrierung.setVisible(False)
+        labelPdfErstellen = QLabel("PDF erstellen und per GDT übertragen")
+        labelPdfErstellen.setStyleSheet("font-weight:normal")
+        self.checkboxPdfErstellen = QCheckBox()
+        self.checkboxPdfErstellen.setChecked(self.pdferstellen)
+        labelBmiUebernehmen = QLabel("Größe/Gewicht zur BMI-Berechnung übernehmen")
+        labelBmiUebernehmen.setStyleSheet("font-weight:normal")
+        self.checkboxBmiUebernehmen = QCheckBox()
+        self.checkboxBmiUebernehmen.setChecked(self.bmiuebernehmen)
+        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
+            labelKeineRegistrierung.setVisible(True)
+            self.checkboxPdfErstellen.setEnabled(False)
+            self.checkboxPdfErstellen.setChecked(False)
+            self.checkboxBmiUebernehmen.setEnabled(False)
+            self.checkboxBmiUebernehmen.setChecked(False)
+        groupboxLayoutPdfErstellung = QGridLayout()
+        groupboxLayoutPdfErstellung.addWidget(labelKeineRegistrierung, 0, 0, 1, 2)
+        groupboxLayoutPdfErstellung.addWidget(labelPdfErstellen, 1, 0)
+        groupboxLayoutPdfErstellung.addWidget(self.checkboxPdfErstellen, 1, 1)
+        groupboxLayoutPdfErstellung.addWidget(labelBmiUebernehmen, 2, 0)
+        groupboxLayoutPdfErstellung.addWidget(self.checkboxBmiUebernehmen, 2, 1)
+        groupboxPdfErstellung.setLayout(groupboxLayoutPdfErstellung)
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
+        dialogLayoutV.addWidget(groupboxPdfErstellung)
         dialogLayoutV.addWidget(self.buttonBox)
         dialogLayoutV.setContentsMargins(10, 10, 10, 10)
         dialogLayoutV.setSpacing(20)

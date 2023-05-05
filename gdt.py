@@ -232,11 +232,12 @@ class GdtDatei:
         Parameter:
             feldkennung: str
         Return:
-            Inhalt: str
+            Inhalt: str oder None (falls Feldkennung nicht vorhanden)
         """
         for zeile in self.gdtDatei:
             if gdtzeile.getFeldkennung(zeile) == feldkennung:
                 return gdtzeile.getInhalt(zeile)
+        return None
     def getAlleInhalte(self, feldkennung:str):
         """
         Gibt eine Liste aller Inhalte einer Feldkennung zurück

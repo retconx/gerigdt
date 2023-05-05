@@ -1,7 +1,7 @@
 import sys, configparser, os, datetime, shutil
 import gdt, gdtzeile, gdttoolsL
 import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel
-
+import geriasspdf
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QLocale
 from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon
 from PySide6.QtWidgets import (
@@ -17,8 +17,7 @@ from PySide6.QtWidgets import (
     QLabel, 
     QDateEdit,
     QComboBox,
-    QMessageBox,
-    QLineEdit
+    QMessageBox
 )
 
 basedir = os.path.dirname(__file__)
@@ -58,6 +57,8 @@ except ImportError:
     pass
 
 class MainWindow(QMainWindow):
+    barthelTests = ["Essen", "Baden", "Körperpflege (Rasieren, Zähneputzen)", "An- und Auskleiden", "Stuhlkontrolle", "Urinkontrolle", "Toilettenbenutzung", "Bett-/ (Roll-) Stuhltransfer", "Mobilität", "Treppensteigen"]
+    barthelMaxPunkte = [10, 5, 5, 10, 10, 10, 10, 15, 15, 10]
     barthelEssen = ["Unfähig, alleine zu essen (0)", "Braucht etwas Hilfe (5)", "Selbstständig, benötigt keine Hilfe (10)"]
     barthelBaden = ["Abhängig von fremder Hilfe (0)", "Selbstständig, benötigt keine Hilfe (5)"]
     barthelKoerperpflege = ["Abhängig von fremder Hilfe (0)", "Selbstständig, benötigt keine Hilfe (5)"]
@@ -108,21 +109,21 @@ class MainWindow(QMainWindow):
         self.configPath = updateSafePath
         self.configIni = configparser.ConfigParser()
         if os.path.exists(os.path.join(updateSafePath, "config.ini")):
-            self.onfigPath = updateSafePath
+            self.configPath = updateSafePath
         elif os.path.exists(os.path.join(basedir, "config.ini")):
             try:
                 if (not os.path.exists(updateSafePath)):
                     os.makedirs(updateSafePath, 0o777)
                 shutil.copy(os.path.join(basedir, "config.ini"), updateSafePath)
-                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Die Konfigurationsdatei config.ini wurde nach " + updateSafePath + " kopiert um sie vor Überschreiben bei einem Update zu schützen.", QMessageBox.StandardButton.Ok)
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die Konfigurationsdatei config.ini wurde nach " + updateSafePath + " kopiert um sie vor Überschreiben bei einem Update zu schützen.", QMessageBox.StandardButton.Ok)
                 mb.exec()
                 self.configPath = updateSafePath
             except:
-                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Problem beim Kopieren der Konfigurationsdatei. GeriGDT wird mit Standardeinstellungen gestartet.", QMessageBox.StandardButton.Ok)
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Problem beim Kopieren der Konfigurationsdatei. GeriGDT wird mit Standardeinstellungen gestartet.", QMessageBox.StandardButton.Ok)
                 mb.exec()
                 self.configPath = basedir
         else:
-            mb = QMessageBox(QMessageBox.Icon.Critical, "Hinweis", "Die Konfigurationsdatei config.ini fehlt. GeriGDT kann nicht gestartet werden.", QMessageBox.StandardButton.Ok)
+            mb = QMessageBox(QMessageBox.Icon.Critical, "Hinweis von GeriGDT", "Die Konfigurationsdatei config.ini fehlt. GeriGDT kann nicht gestartet werden.", QMessageBox.StandardButton.Ok)
             mb.exec()
             app.quit()
         self.configIni.read(os.path.join(self.configPath, "config.ini"))
@@ -134,6 +135,15 @@ class MainWindow(QMainWindow):
         self.version = self.configIni["Allgemein"]["version"]
         self.dokuVerzeichnis = self.configIni["Allgemein"]["dokuverzeichnis"]
         self.vorherigeDokuLaden = (self.configIni["Allgemein"]["vorherigedokuladen"] == "1")
+        # Nachträglich hinzufefügte Options
+        # 3.2.2
+        self.pdferstellen = False
+        if self.configIni.has_option("Allgemein", "pdferstellen"):
+            self.pdferstellen = (self.configIni["Allgemein"]["pdferstellen"] == "1")
+        self.bmiuebernehmen = False
+        if self.configIni.has_option("Allgemein", "bmiuebernehmen"):
+            self.bmiuebernehmen = (self.configIni["Allgemein"]["bmiuebernehmen"] == "1")
+        # /Nachträglich hinzufefügte Options
         z = self.configIni["GDT"]["zeichensatz"]
         self.zeichensatz = gdt.GdtZeichensatz.IBM_CP437
         if z == "1":
@@ -148,14 +158,25 @@ class MainWindow(QMainWindow):
         try:
             configIniBase.read(os.path.join(basedir, "config.ini"))
             if versionVeraltet(self.version, configIniBase["Allgemein"]["version"]):
+                # Version aktualisieren
                 self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
+                # config.ini aktualisieren
+                # 3.2.1 -> 3.2.2: ["Allgemein"]["pdferstellen"], ["Allgemein"]["bmiuebernehmen"] und pdf-Ordner hinzufügen
+                if not self.configIni.has_option("Allgemein", "pdferstellen"):
+                    self.configIni["Allgemein"]["pdferstellen"] = "0"
+                if not self.configIni.has_option("Allgemein", "bmiuebernehmen"):
+                    self.configIni["Allgemein"]["bmiuebernehmen"] = "0"
+                if not os.path.exists(os.path.join(basedir, "pdf")):
+                    os.mkdir(os.path.join(basedir, "pdf"), 0o777)
+                # /config.ini aktualisieren
+
                 with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                     self.configIni.write(configfile)
                 self.version = self.configIni["Allgemein"]["version"]
-                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "GeriGDT wurde erfolgreich auf Version " + self.version + " aktualisiert.", QMessageBox.StandardButton.Ok)
+                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "GeriGDT wurde erfolgreich auf Version " + self.version + " aktualisiert.", QMessageBox.StandardButton.Ok)
                 mb.exec()
         except:
-            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"], QMessageBox.StandardButton.Ok)
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"], QMessageBox.StandardButton.Ok)
             mb.exec()
 
         # Add-Ons freigeschaltet?
@@ -176,14 +197,24 @@ class MainWindow(QMainWindow):
         # GDT-Datei laden
         gd = gdt.GdtDatei()
         self.patId = "-"
-        name = "-"
+        self.name = "-"
+        self.geburtsdatum = "-"
+        self.groesse = "-"
+        self.gewicht = "-"
         mbErg = QMessageBox.StandardButton.Yes
         try:
             gd.laden(self.gdtImportVerzeichnis + "/GERIT2MD.gdt", self.zeichensatz, self.configIni["GDT"]["idpraxisedv"])
             self.patId = str(gd.getInhalt("3000"))
-            name = str(gd.getInhalt("3102")) + " " + str(gd.getInhalt("3101"))
+            self.name = str(gd.getInhalt("3102")) + " " + str(gd.getInhalt("3101"))
+            self.geburtsdatum = str(gd.getInhalt("3103"))[0:2] + "." + str(gd.getInhalt("3103"))[2:4] + "." + str(gd.getInhalt("3103"))[4:8]
+            if gd.getInhalt("3622") and gd.getInhalt("3623"):
+                self.groesse = str(gd.getInhalt("3622"))
+                self.gewicht = str(gd.getInhalt("3623"))
+            elif self.pdferstellen and self.bmiuebernehmen:
+                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Körpergröße und -gewicht wurden nicht vom Praxisverwaltungssystem übermittelt. Der BMI kann daher für die PDF-Dateierstellung nicht berechnent werden.", QMessageBox.StandardButton.Ok)
+                mb.exec()
         except (IOError, gdtzeile.GdtFehlerException) as e:
-            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Fehler beim Laden der GDT-Datei:\n" + str(e) + "\n\nSoll GeriGDT dennoch geöffnet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Fehler beim Laden der GDT-Datei:\n" + str(e) + "\n\nSoll GeriGDT dennoch geöffnet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
             mb.button(QMessageBox.StandardButton.No).setText("Nein")
             mb.setDefaultButton(QMessageBox.StandardButton.No)
@@ -407,7 +438,7 @@ class MainWindow(QMainWindow):
             labelDokuVon = QLabel("Dokumentiert von:")
             labelNameGdt = QLabel()
             labelPatIdGdt = QLabel()
-            labelNameGdt.setText(name)
+            labelNameGdt.setText(self.name)
             labelPatIdGdt.setText(self.patId)
             untdat = QDate()
             self.untdatEdit = QDateEdit()
@@ -462,7 +493,7 @@ class MainWindow(QMainWindow):
             einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer) # type: ignore
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
-            einstellungenErweiterungenAction.triggered.connect(self.einstellungenProgrammerweiterungen) # type: ignore
+            einstellungenErweiterungenAction.triggered.connect(self.einstellungenLanrLizenzschluessel) # type: ignore
             einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
             einstellungenMenu.addAction(einstellungenAllgemeinAction)
             einstellungenMenu.addAction(einstellungenGdtAction)
@@ -481,7 +512,7 @@ class MainWindow(QMainWindow):
                 with open(pfad + "/" + dokus[len(dokus) - 1], "r") as d:
                     doku = d.read()
             except IOError as e:
-                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Fehler beim Lesen der vorherigen Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Lesen der vorherigen Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
                 mb.exec()
         if doku != "" and self.addOnsFreigeschaltet:
             # Untersuchungsdatum
@@ -527,7 +558,7 @@ class MainWindow(QMainWindow):
     def datumGeaendert(self, datum):
         gewaehltesDatum = QDate(datum)
         if gewaehltesDatum.daysTo(QDate().currentDate()) < 0:
-            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Das Untersuchungsdatum darf nicht in der Zukunft liegen.", QMessageBox.StandardButton.Ok)
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Das Untersuchungsdatum darf nicht in der Zukunft liegen.", QMessageBox.StandardButton.Ok)
             mb.exec()
 
     def benutzerGewechselt(self):
@@ -537,13 +568,18 @@ class MainWindow(QMainWindow):
         de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)
         if de.exec() == 1:
             self.configIni["Allgemein"]["dokuverzeichnis"] = de.lineEditArchivierungsverzeichnis.text()
+            self.configIni["Allgemein"]["vorherigedokuladen"] = "0"
             if de.checkboxVorherigeDokuLaden.isChecked():
                 self.configIni["Allgemein"]["vorherigedokuladen"] = "1"
-            else:
-                self.configIni["Allgemein"]["vorherigedokuladen"] = "0"
+            self.configIni["Allgemein"]["pdferstellen"] = "0"
+            if de.checkboxPdfErstellen.isChecked():
+                self.configIni["Allgemein"]["pdferstellen"] = "1"  
+            self.configIni["Allgemein"]["bmiuebernehmen"] = "0"
+            if de.checkboxBmiUebernehmen.isChecked():
+                self.configIni["Allgemein"]["bmiuebernehmen"] = "1"  
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
                 mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
                 mb.button(QMessageBox.StandardButton.No).setText("Nein")
@@ -562,7 +598,7 @@ class MainWindow(QMainWindow):
             self.configIni["GDT"]["zeichensatz"] = str(de.aktuelleZeichensatznummer + 1)
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
                 mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
                 mb.button(QMessageBox.StandardButton.No).setText("Nein")
@@ -582,21 +618,21 @@ class MainWindow(QMainWindow):
             self.configIni["Benutzer"]["kuerzel"] = "::".join(kuerzel)
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen in der Benutzerverwaltung wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen in der Benutzerverwaltung wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
                 mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
                 mb.button(QMessageBox.StandardButton.No).setText("Nein")
                 if mb.exec() == QMessageBox.StandardButton.Yes:
                     app.quit()
 
-    def einstellungenProgrammerweiterungen(self):
+    def einstellungenLanrLizenzschluessel(self):
         de = dialogEinstellungenLanrLizenzschluessel.EinstellungenProgrammerweiterungen(self.configPath)
         if de.exec() == 1:
             self.configIni["Erweiterungen"]["lanr"] = de.lineEditLanr.text()
             self.configIni["Erweiterungen"]["lizenzschluessel"] = de.lineEditLizenzschluessel.text()
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 mb.setDefaultButton(QMessageBox.StandardButton.Yes)
                 mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
                 mb.button(QMessageBox.StandardButton.No).setText("Nein")
@@ -626,6 +662,12 @@ class MainWindow(QMainWindow):
         gd.addZeile("6200", self.datum)
         gd.addZeile("6201", uhrzeit)
         gd.addZeile("8402", "ALLG00")
+        # PDF hinzufügen
+        if self.pdferstellen:
+            gd.addZeile("6302", "geri_ass")
+            gd.addZeile("6303", "pdf")
+            gd.addZeile("6304", "Geriatrisches Basisassessment")
+            gd.addZeile("6305", os.path.join(basedir, "pdf/geriass_temp.pdf"))
         # Barthel
         testBarthelEssen = gdt.GdtTest("ESSEN", "Essen", str(barthelEinzel[0]), "von 10 Punkten")
         gd.addTest(testBarthelEssen)
@@ -688,10 +730,76 @@ class MainWindow(QMainWindow):
         gd.addZeile("6221", "Timed \"Up and Go\": " + str(tugErgebnis))
         gd.addZeile("6221", "Kognitive Funktion: " + str(kfErgebnis))
         gd.addZeile("6221", "Pflegegrad: " + str(pgErgebnis))
+
+        # PDF erzeugen
+        if self.pdferstellen:
+            # BMI berechnen
+            bmi = 0
+            if self.pdferstellen and self.bmiuebernehmen and self.groesse != "-" and self.gewicht != "-":
+                # Prüfen, ob Grüße in cm oder m
+                groesse = float(self.groesse.replace(",", "."))
+                if groesse > 3:
+                    groesse /= 100
+                bmi = "{:.1f}".format(float(self.gewicht.replace(",", ".")) / groesse / groesse)
+            
+            pdf = geriasspdf.geriasspdf ("P", "mm", "A4")
+            pdf.add_page()
+            bmiText = ""
+            if bmi != 0:
+                bmiText = ", BMI = " + bmi + " kg/m\u00b2"
+            pdf.set_font("helvetica", "", 14)
+            pdf.cell(0, 10, "von " + self.name + " (* " + self.geburtsdatum + bmiText + ")", align="C", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("helvetica", "", 10)
+            untdat = "{:>02}".format(str(self.untdatEdit.date().day())) + "." + "{:>02}".format(str(self.untdatEdit.date().month())) + "." + str(self.untdatEdit.date().year())
+            pdf.cell(0, 6, "Untersucht am " + untdat, align="C", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(0, 10, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("helvetica", "", 14)
+            pdf.set_font(style="B")
+            pdf.cell(0, 8, "Barthel-Index", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="")
+            # Barthel
+            pdf.set_fill_color(240,240,240)
+            i = 0
+            for test in self.barthelTests:
+                pdf.cell(90, 10, test + ":", fill=(i % 2 == 0))
+                if barthelEinzel[i] != self.barthelMaxPunkte[i]:
+                    pdf.set_font(style="B")
+                pdf.cell(0, 10, str(barthelEinzel[i]) +  " von " + str(self.barthelMaxPunkte[i]) + " Punkten", align="R", new_x="LMARGIN", new_y="NEXT", fill=(i % 2 == 0))
+                pdf.set_font(style="")
+                i += 1
+            pdf.set_font(style="B")
+            pdf.cell(90, 10, "Summe:", border="T")
+            pdf.cell(0, 10, str(barthelGesamt) + " Punkte", border="T", align="R", new_x="LMARGIN", new_y="NEXT")
+            # Timed "Up and Go"
+            pdf.cell(0, 4, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="B")
+            pdf.cell(0, 8, "Timed \u0022Up and Go\u0022-Test", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="")
+            pdf.cell(30, 10, "Ergebnis:")
+            pdf.cell(0, 10, tugErgebnis, align="R", new_x="LMARGIN", new_y="NEXT")
+            # Kognitive Funktion
+            pdf.cell(0, 4, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="B")
+            pdf.cell(0, 8, "Kognitive Funktion", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="")
+            pdf.cell(30, 10, "Ergebnis:")
+            pdf.cell(0, 10, kfErgebnis, align="R", new_x="LMARGIN", new_y="NEXT")
+            # Pflegegrad
+            pdf.cell(0, 4, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="B")
+            pdf.cell(0, 8, "Pflegegrad", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="")
+            pdf.cell(30, 10, "Ergebnis:")
+            pdf.cell(0, 10, pgErgebnis, align="R", new_x="LMARGIN")
+            #pdf.cell(0, 46, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_y(-30)
+            pdf.set_font("helvetica", "I", 10)
+            pdf.cell(0, 10, "Generiert von GeriGDT V" + self.version + " (\u00a9 GDT-Tools " + str(datetime.date.today().year) + ")", align="R")
+            pdf.output(os.path.join(basedir, "pdf/geriass_temp.pdf"))
                     
         # GDT-Datei exportieren
         if not gd.speichern(self.gdtExportVerzeichnis + "/T2MDGERI.gdt", self.zeichensatz):
-            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "GDT-Export nicht möglich.\nBitte überprüfen Sie die Angabe des Exportverzeichnisses.", QMessageBox.StandardButton.Ok)
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "GDT-Export nicht möglich.\nBitte überprüfen Sie die Angabe des Exportverzeichnisses.", QMessageBox.StandardButton.Ok)
             mb.exec()
         else:
             dokuZusammenfassung = self.dokuZusammenfassen(barthelEinzel, tugErgebnisInt, kfErgebnisInt, pgErgebnisInt)
@@ -704,12 +812,12 @@ class MainWindow(QMainWindow):
                         with open(self.dokuVerzeichnis + "/" + self.patId + "/" + speicherdatum + "_" + self.patId + ".gba", "w") as zf:
                             zf.write(dokuZusammenfassung)
                     except IOError as e:
-                        mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Fehler beim Speichern der Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
+                        mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Speichern der Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
                         mb.exec()
                     except:
                         raise
                 else:
-                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis", "Speichern der Dokumentation nicht möglich\nBitte überprüfen Sie die Angabe des Dokumentations-Speicherverzeichnisses.", QMessageBox.StandardButton.Ok)
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Speichern der Dokumentation nicht möglich\nBitte überprüfen Sie die Angabe des Dokumentations-Speicherverzeichnisses.", QMessageBox.StandardButton.Ok)
                     mb.exec()
 
         app.quit()
