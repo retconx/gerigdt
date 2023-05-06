@@ -72,10 +72,12 @@ class EinstellungenAllgemein(QDialog):
         labelPdfErstellen.setStyleSheet("font-weight:normal")
         self.checkboxPdfErstellen = QCheckBox()
         self.checkboxPdfErstellen.setChecked(self.pdferstellen)
+        self.checkboxPdfErstellen.stateChanged.connect(self.checkboxPdfErstellenChanged) # type: ignore
         labelBmiUebernehmen = QLabel("Größe/Gewicht zur BMI-Berechnung übernehmen")
         labelBmiUebernehmen.setStyleSheet("font-weight:normal")
         self.checkboxBmiUebernehmen = QCheckBox()
         self.checkboxBmiUebernehmen.setChecked(self.bmiuebernehmen)
+        self.checkboxBmiUebernehmen.stateChanged.connect(self.checkboxBmiUebernehmenChanged) # type: ignore
         if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
             labelKeineRegistrierung.setVisible(True)
             self.checkboxPdfErstellen.setEnabled(False)
@@ -108,3 +110,11 @@ class EinstellungenAllgemein(QDialog):
         if fd.exec() == 1:
             self.dokuverzeichnis = fd.directory()
             self.lineEditArchivierungsverzeichnis.setText(fd.directory().path())
+
+    def checkboxPdfErstellenChanged(self, newState):
+        if not newState:
+            self.checkboxBmiUebernehmen.setChecked(False)
+
+    def checkboxBmiUebernehmenChanged(self, newState):
+        if newState:
+            self.checkboxPdfErstellen.setChecked(True)

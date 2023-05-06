@@ -20,7 +20,7 @@ class EinstellungenBenutzer(QDialog):
         self.benutzernamen = (configIni["Benutzer"]["namen"]).split("::")
         self.benutzerkuerzel = (configIni["Benutzer"]["kuerzel"]).split("::")
 
-        self.setWindowTitle("Benutzer verwalten")
+        self.setWindowTitle("BenutzerInnen verwalten")
         self.setMinimumSize(QSize(300,250))
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")

@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(left, top, mainwindowBreite, mainwindowHoehe)
 
     # Statusmeldungen ändern
-    def changeStatus(self, statusnummer:int, statustext:str, rot = False):
+    def changeStatus(self, statusnummer:int, statustext:str, rot = False, gruen = False):
         """
             Ändert eine Statusmeldung
             Parameter:
@@ -96,6 +96,8 @@ class MainWindow(QMainWindow):
         self.statusanzeigeLabel[statusnummer].setText(self.statusanzeigeLabelTexte[statusnummer] + ": " + statustext)
         if rot:
             self.statusanzeigeLabel[statusnummer].setStyleSheet("font-weight:normal; color:rgb(200,0,0)")
+        elif gruen:
+            self.statusanzeigeLabel[statusnummer].setStyleSheet("font-weight:normal; color:rgb(0,150,0)")
 
     def __init__(self):
         super().__init__()
@@ -260,12 +262,16 @@ class MainWindow(QMainWindow):
             testLayout = QGridLayout()
             barthelLabel = QLabel(text="Barthel-Index")
             barthelLabel.setFont(fontBoldGross)
+            self.labelBarthelGesamt = QLabel("Gesamt: 100 Punkte")
+            self.labelBarthelGesamt.setFont(fontBoldGross)
+            self.labelBarthelGesamt.setStyleSheet("color:rgb(100,100,100)")
             groupboxLayout = QVBoxLayout()
             groupboxBarthelEssen = QGroupBox(title="Essen")
             self.radiobuttonBarhelEssen = []
             for radio in self.barthelEssen:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelEssen.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelEssen[len(self.barthelEssen) - 1].setChecked(True)
@@ -278,6 +284,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelBaden:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelBaden.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelBaden[len(self.barthelBaden) - 1].setChecked(True)
@@ -290,6 +297,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelKoerperpflege:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelKoerperpflege.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelKoerperpflege[len(self.barthelKoerperpflege) - 1].setChecked(True)
@@ -302,6 +310,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelAnAuskleiden:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelAnAuskleiden.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelAnAuskleiden[len(self.barthelAnAuskleiden) - 1].setChecked(True)
@@ -314,6 +323,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelStuhlkontrolle:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelStuhlkontrolle.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelStuhlkontrolle[len(self.barthelStuhlkontrolle) - 1].setChecked(True)
@@ -326,6 +336,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelUrinkontrolle:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelUrinkontrolle.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelUrinkontrolle[len(self.barthelUrinkontrolle) - 1].setChecked(True)
@@ -338,6 +349,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelToilettenbenutzung:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelToilettenbenutzung.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelToilettenbenutzung[len(self.barthelToilettenbenutzung) - 1].setChecked(True)
@@ -350,6 +362,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelBettRollstuhltransfer:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelBettRollstuhltransfer.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelBettRollstuhltransfer[len(self.barthelBettRollstuhltransfer) - 1].setChecked(True)
@@ -362,6 +375,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelMobilitaet:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelMobilitaet.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelMobilitaet[len(self.barthelMobilitaet) - 1].setChecked(True)
@@ -374,6 +388,7 @@ class MainWindow(QMainWindow):
             for radio in self.barthelTreppensteigen:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelTreppensteigen.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonBarhelTreppensteigen[len(self.barthelTreppensteigen) - 1].setChecked(True)
@@ -386,6 +401,7 @@ class MainWindow(QMainWindow):
             for radio in self.timedUpGo:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonTimedUpGo.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonTimedUpGo[0].setChecked(True)
@@ -398,6 +414,7 @@ class MainWindow(QMainWindow):
             for radio in self.kognitiveFunktion:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonKognitiveFunktion.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonKognitiveFunktion[0].setChecked(True)
@@ -410,13 +427,15 @@ class MainWindow(QMainWindow):
             for radio in self.pflegegrad:
                 rb = QRadioButton(text=radio)
                 rb.setFont(font)
+                rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonPflegegrad.append(rb)
                 groupboxLayout.addWidget(rb)
             self.radiobuttonPflegegrad[len(self.pflegegrad) - 2].setChecked(True)
             groupboxPflegegrad.setLayout(groupboxLayout)
             groupboxPflegegrad.setFont(fontBold)
 
-            testLayout.addWidget(barthelLabel, 0, 0, 1, 2, Qt.AlignmentFlag.AlignHCenter)
+            testLayout.addWidget(barthelLabel, 0, 0, alignment=Qt.AlignmentFlag.AlignCenter)
+            testLayout.addWidget(self.labelBarthelGesamt, 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
             testLayout.addWidget(groupboxBarthelEssen, 1, 0)
             testLayout.addWidget(groupboxBarthelBaden, 2, 0)
             testLayout.addWidget(groupboxBarthelKoerperpflege, 3, 0)
@@ -489,7 +508,7 @@ class MainWindow(QMainWindow):
             einstellungenGdtAction = QAction("GDT-Einstellungen", self)
             einstellungenGdtAction.triggered.connect(self.einstellungenGdt) # type: ignore
             einstellungenGdtAction.setShortcut(QKeySequence("Ctrl+G"))
-            einstellungenBenutzerAction = QAction("Benutzer verwalten", self)
+            einstellungenBenutzerAction = QAction("BenutzerInnen verwalten", self)
             einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer) # type: ignore
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
@@ -517,7 +536,7 @@ class MainWindow(QMainWindow):
         if doku != "" and self.addOnsFreigeschaltet:
             # Untersuchungsdatum
             untdat = self.dokuZusammenfassungLesen(doku)[0]
-            self.changeStatus(1, untdat.toString("dd.MM.yyyy"))
+            self.changeStatus(1, untdat.toString("dd.MM.yyyy"), gruen=True)
             self.buttonAlteUntersuchung.setEnabled(True)
             self.buttonAlteUntersuchung.setToolTip("Vorheriges Untersuchungsergebnis wiederherstellen")
             # Barthel ausfüllen
@@ -532,6 +551,7 @@ class MainWindow(QMainWindow):
             self.radiobuttonBarhelBettRollstuhltransfer[int(barthelGesamt[7] / 5)].setChecked(True)
             self.radiobuttonBarhelMobilitaet[int(barthelGesamt[8] / 5)].setChecked(True)
             self.radiobuttonBarhelTreppensteigen[int(barthelGesamt[9] / 5)].setChecked(True)
+            self.barthelGeklickt()
             # Rest ausfüllen
             tug = int(self.dokuZusammenfassungLesen(doku)[2])
             pg = int(self.dokuZusammenfassungLesen(doku)[3])
@@ -549,6 +569,10 @@ class MainWindow(QMainWindow):
             self.changeStatus(1, "-")
             self.buttonAlteUntersuchung.setEnabled(False)
             self.buttonAlteUntersuchung.setToolTip("Funktion nicht verfügbar")
+
+    def barthelGeklickt(self):
+        barthelGesamt = self.barthelBerechnen()[1]
+        self.labelBarthelGesamt.setText("Gesamt: " + str(barthelGesamt) + " Punkte")
 
 
     def vorherigeUntersuchungWiederherstellen(self):
@@ -639,8 +663,12 @@ class MainWindow(QMainWindow):
                 if mb.exec() == QMessageBox.StandardButton.Yes:
                     app.quit()
 
-    def datenSendenClicked(self):
-        # Barthel berechnen
+    def barthelBerechnen(self):
+        """
+        Berechnet den aktuell gewählten Bathelindex
+        Rückgabe:
+            Tupel(barthelEinzel:list, barthelGesamt.int)
+        """
         barthelTests = [self.radiobuttonBarhelEssen, self.radiobuttonBarhelBaden, self.radiobuttonBarhelKoerperpflege, self.radiobuttonBarhelAnAuskleiden, self.radiobuttonBarhelStuhlkontrolle, self.radiobuttonBarhelUrinkontrolle, self.radiobuttonBarhelToilettenbenutzung, self.radiobuttonBarhelBettRollstuhltransfer, self.radiobuttonBarhelMobilitaet, self.radiobuttonBarhelTreppensteigen]
         barthelEinzel = []
         barthelGesamt = 0
@@ -651,6 +679,10 @@ class MainWindow(QMainWindow):
                     barthelGesamt += zaehler * 5
                     barthelEinzel.append(zaehler * 5)
                 zaehler += 1
+        return (barthelEinzel, barthelGesamt)
+
+    def datenSendenClicked(self):
+        barthelEinzel, barthelGesamt = self.barthelBerechnen()
 
         # GDT-Datei erzeugen
         sh = gdt.SatzHeader(gdt.Satzart.DATEN_EINER_UNTERSUCHUNG_UEBERMITTELN_6310, self.configIni["GDT"]["idpraxisedv"], self.configIni["GDT"]["idgerigdt"], self.zeichensatz, "2.10", "Fabian Treusch - GDT-Tools", "GeriGDT", "1.0.0", self.patId)
