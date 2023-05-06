@@ -730,7 +730,7 @@ class MainWindow(QMainWindow):
                 break
             else:
                 tugErgebnisInt += 1
-        testTimedUpGo = gdt.GdtTest("TIMEDUPGO", "Times \"Up and Go\"", tugErgebnis, "")
+        testTimedUpGo = gdt.GdtTest("TIMEDUPGO", "Timed \"Up and Go\"", tugErgebnis, "")
         gd.addTest(testTimedUpGo)
         # Kognitive Funktion
         kfErgebnis = ""
