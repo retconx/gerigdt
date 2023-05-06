@@ -685,7 +685,7 @@ class MainWindow(QMainWindow):
         barthelEinzel, barthelGesamt = self.barthelBerechnen()
 
         # GDT-Datei erzeugen
-        sh = gdt.SatzHeader(gdt.Satzart.DATEN_EINER_UNTERSUCHUNG_UEBERMITTELN_6310, self.configIni["GDT"]["idpraxisedv"], self.configIni["GDT"]["idgerigdt"], self.zeichensatz, "2.10", "Fabian Treusch - GDT-Tools", "GeriGDT", "1.0.0", self.patId)
+        sh = gdt.SatzHeader(gdt.Satzart.DATEN_EINER_UNTERSUCHUNG_UEBERMITTELN_6310, self.configIni["GDT"]["idpraxisedv"], self.configIni["GDT"]["idgerigdt"], self.zeichensatz, "2.10", "Fabian Treusch - GDT-Tools", "GeriGDT", self.version, self.patId)
         gd = gdt.GdtDatei()
         gd.erzeugeGdtDatei(sh.getSatzheader())
         self.datum = "{:>02}".format(str(self.untdatEdit.date().day())) + "{:>02}".format(str(self.untdatEdit.date().month())) + str(self.untdatEdit.date().year())
