@@ -800,7 +800,7 @@ class MainWindow(QMainWindow):
                 pdf.set_font(style="")
                 i += 1
             pdf.set_font(style="B")
-            pdf.cell(90, 10, "Summe:", border="T")
+            pdf.cell(90, 10, "Gesamt:", border="T")
             pdf.cell(0, 10, str(barthelGesamt) + " Punkte", border="T", align="R", new_x="LMARGIN", new_y="NEXT")
             # Timed "Up and Go"
             pdf.cell(0, 4, new_x="LMARGIN", new_y="NEXT")
