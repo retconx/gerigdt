@@ -1,9 +1,9 @@
 import sys, configparser, os, datetime, shutil
 import gdt, gdtzeile, gdttoolsL
-import dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel
+import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel
 import geriasspdf
-from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QLocale
-from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon
+from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo
+from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -17,8 +17,9 @@ from PySide6.QtWidgets import (
     QLabel, 
     QDateEdit,
     QComboBox,
-    QMessageBox
+    QMessageBox, 
 )
+import requests
 
 basedir = os.path.dirname(__file__)
 
@@ -500,8 +501,17 @@ class MainWindow(QMainWindow):
                 self.mitVorherigerUntersuchungAusfuellen()
 
             # Menü
-            menu = self.menuBar()
-            einstellungenMenu = menu.addMenu("Einstellungen")
+            menubar = self.menuBar()
+            anwendungMenu = menubar.addMenu("")
+            aboutAction = QAction(self)
+            aboutAction.setMenuRole(QAction.MenuRole.AboutRole)
+            aboutAction.triggered.connect(self.ueberGeriGdt) # type: ignore
+            aboutAction.setShortcut(QKeySequence("Ctrl+Ü"))
+            updateAction = QAction("Auf Update prüfen", self)
+            updateAction.setMenuRole(QAction.MenuRole.ApplicationSpecificRole)
+            updateAction.triggered.connect(self.updatePruefung) # type: ignore
+            updateAction.setShortcut(QKeySequence("Ctrl+U"))
+            einstellungenMenu = menubar.addMenu("Einstellungen")
             einstellungenAllgemeinAction = QAction("Allgemeine Einstellungen", self)
             einstellungenAllgemeinAction.triggered.connect(self.einstellungenAllgemein) # type: ignore
             einstellungenAllgemeinAction.setShortcut(QKeySequence("Ctrl+E"))
@@ -514,10 +524,32 @@ class MainWindow(QMainWindow):
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
             einstellungenErweiterungenAction.triggered.connect(self.einstellungenLanrLizenzschluessel) # type: ignore
             einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
+            hilfeMenu = menubar.addMenu("Hilfe")
+            hilfeWikiAction = QAction("GeriGDT Wiki", self)
+            hilfeWikiAction.triggered.connect(self.gerigdtWiki) # type: ignore
+            hilfeWikiAction.setShortcut(QKeySequence("Ctrl+W"))
+            hilfeUpdateAction = QAction("Auf Update prüfen", self)
+            hilfeUpdateAction.triggered.connect(self.updatePruefung) # type: ignore
+            hilfeUpdateAction.setShortcut(QKeySequence("Ctrl+U"))
+            hilfeUeberAction = QAction("Über GeriGDT", self)
+            hilfeUeberAction.setMenuRole(QAction.MenuRole.NoRole)
+            hilfeUeberAction.triggered.connect(self.ueberGeriGdt) # type: ignore
+            hilfeUeberAction.setShortcut(QKeySequence("Ctrl+Ü"))
+            
+            anwendungMenu.addAction(aboutAction)
+            anwendungMenu.addAction(updateAction)
             einstellungenMenu.addAction(einstellungenAllgemeinAction)
             einstellungenMenu.addAction(einstellungenGdtAction)
             einstellungenMenu.addAction(einstellungenBenutzerAction)
             einstellungenMenu.addAction(einstellungenErweiterungenAction)
+            hilfeMenu.addAction(hilfeWikiAction)
+            hilfeMenu.addSeparator()
+            hilfeMenu.addAction(hilfeUpdateAction)
+            hilfeMenu.addSeparator()
+            hilfeMenu.addAction(hilfeUeberAction)
+            
+            # Updateprüfung auf Github
+            self.updatePruefung(meldungNurWennUpdateVerfuegbar=True)
         else:
             sys.exit()
 
@@ -587,6 +619,23 @@ class MainWindow(QMainWindow):
 
     def benutzerGewechselt(self):
         self.aktuelleBenuztzernummer = self.dokuvonComboBox.currentIndex()
+
+    def updatePruefung(self, meldungNurWennUpdateVerfuegbar = False):
+        response = requests.get("https://api.github.com/repos/retconx/gerigdt/releases/latest")
+        githubRelaseTag = response.json()["tag_name"]
+        latestVersion = githubRelaseTag[1:] # ohne v
+        if versionVeraltet(self.version, latestVersion):
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die aktuellere GeriGDT-Version " + latestVersion + " ist auf <a href='https://www.github.com/retconx/gerigdt/releases'>Github</a> verfügbar.", QMessageBox.StandardButton.Ok)
+            mb.setTextFormat(Qt.TextFormat.RichText)
+            mb.exec()
+        elif not meldungNurWennUpdateVerfuegbar:
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Sie nutzen die aktuelle GeriGDT-Version.", QMessageBox.StandardButton.Ok)
+            mb.exec()
+
+    def ueberGeriGdt(self):
+        de = dialogUeberGeriGdt.UeberGeriGdt(self)
+        if de.exec() == 1:
+            pass
 
     def einstellungenAllgemein(self):
         de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)
@@ -662,6 +711,9 @@ class MainWindow(QMainWindow):
                 mb.button(QMessageBox.StandardButton.No).setText("Nein")
                 if mb.exec() == QMessageBox.StandardButton.Yes:
                     app.quit()
+    
+    def gerigdtWiki(self, link):
+        QDesktopServices.openUrl("https://www.github.com/retconx/gerigdt/wiki")
 
     def barthelBerechnen(self):
         """
@@ -778,7 +830,7 @@ class MainWindow(QMainWindow):
             pdf.add_page()
             bmiText = ""
             if bmi != 0:
-                bmiText = ", BMI = " + bmi + " kg/m\u00b2"
+                bmiText = ", BMI: " + bmi + " kg/m\u00b2"
             pdf.set_font("helvetica", "", 14)
             pdf.cell(0, 10, "von " + self.name + " (* " + self.geburtsdatum + bmiText + ")", align="C", new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("helvetica", "", 10)
