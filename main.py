@@ -104,6 +104,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # config.ini lesen
+        ersterStart = False
         updateSafePath = ""
         if sys.platform == "win32":
             updateSafePath = os.path.expanduser("~\\appdata\\local\\gerigdt")
@@ -118,9 +119,8 @@ class MainWindow(QMainWindow):
                 if (not os.path.exists(updateSafePath)):
                     os.makedirs(updateSafePath, 0o777)
                 shutil.copy(os.path.join(basedir, "config.ini"), updateSafePath)
-                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die Konfigurationsdatei config.ini wurde nach " + updateSafePath + " kopiert um sie vor Überschreiben bei einem Update zu schützen.", QMessageBox.StandardButton.Ok)
-                mb.exec()
                 self.configPath = updateSafePath
+                ersterStart = True
             except:
                 mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Problem beim Kopieren der Konfigurationsdatei. GeriGDT wird mit Standardeinstellungen gestartet.", QMessageBox.StandardButton.Ok)
                 mb.exec()
@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         else:
             mb = QMessageBox(QMessageBox.Icon.Critical, "Hinweis von GeriGDT", "Die Konfigurationsdatei config.ini fehlt. GeriGDT kann nicht gestartet werden.", QMessageBox.StandardButton.Ok)
             mb.exec()
-            app.quit()
+            sys.exit()
         self.configIni.read(os.path.join(self.configPath, "config.ini"))
         self.gdtImportVerzeichnis = self.configIni["GDT"]["gdtimportverzeichnis"]
         self.gdtExportVerzeichnis = self.configIni["GDT"]["gdtexportverzeichnis"]
@@ -155,6 +155,16 @@ class MainWindow(QMainWindow):
             self.zeichensatz = gdt.GdtZeichensatz.ANSI_CP1252
         self.lanr = self.configIni["Erweiterungen"]["lanr"]
         self.lizenzschluessel = self.configIni["Erweiterungen"]["lizenzschluessel"]
+
+        # Grundeinstellungen bei erstem Start
+        if ersterStart:
+            mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Vermutlich starten Sie GeriGDT das erste Mal auf diesem PC.\nMöchten Sie jetzt die Grundeinstellungen vornehmen?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+            if mb.exec() == QMessageBox.StandardButton.Yes:
+                self.einstellungenLanrLizenzschluessel()
+                self.einstellungenGdt()
+                self.einstellungenAllgemein()
+                self.einstellungenBenutzer(True)
 
         # Version vergleichen und gegebenenfalls aktualisieren
         configIniBase = configparser.ConfigParser()
@@ -513,16 +523,16 @@ class MainWindow(QMainWindow):
             updateAction.setShortcut(QKeySequence("Ctrl+U"))
             einstellungenMenu = menubar.addMenu("Einstellungen")
             einstellungenAllgemeinAction = QAction("Allgemeine Einstellungen", self)
-            einstellungenAllgemeinAction.triggered.connect(self.einstellungenAllgemein) # type: ignore
+            einstellungenAllgemeinAction.triggered.connect(lambda neustartfrage: self.einstellungenAllgemein(True)) # type: ignore
             einstellungenAllgemeinAction.setShortcut(QKeySequence("Ctrl+E"))
             einstellungenGdtAction = QAction("GDT-Einstellungen", self)
-            einstellungenGdtAction.triggered.connect(self.einstellungenGdt) # type: ignore
+            einstellungenGdtAction.triggered.connect(lambda neustartfrage: self.einstellungenGdt(True)) # type: ignore
             einstellungenGdtAction.setShortcut(QKeySequence("Ctrl+G"))
             einstellungenBenutzerAction = QAction("BenutzerInnen verwalten", self)
-            einstellungenBenutzerAction.triggered.connect(self.einstellungenBenutzer) # type: ignore
+            einstellungenBenutzerAction.triggered.connect(lambda neustartfrage: self.einstellungenBenutzer(True)) # type: ignore
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
-            einstellungenErweiterungenAction.triggered.connect(self.einstellungenLanrLizenzschluessel) # type: ignore
+            einstellungenErweiterungenAction.triggered.connect(lambda neustartfrage: self.einstellungenLanrLizenzschluessel(True)) # type: ignore
             einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
             hilfeMenu = menubar.addMenu("Hilfe")
             hilfeWikiAction = QAction("GeriGDT Wiki", self)
@@ -637,7 +647,7 @@ class MainWindow(QMainWindow):
         if de.exec() == 1:
             pass
 
-    def einstellungenAllgemein(self):
+    def einstellungenAllgemein(self, neustartfrage = False):
         de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)
         if de.exec() == 1:
             self.configIni["Allgemein"]["dokuverzeichnis"] = de.lineEditArchivierungsverzeichnis.text()
@@ -652,14 +662,15 @@ class MainWindow(QMainWindow):
                 self.configIni["Allgemein"]["bmiuebernehmen"] = "1"  
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                mb.setDefaultButton(QMessageBox.StandardButton.Yes)
-                mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
-                mb.button(QMessageBox.StandardButton.No).setText("Nein")
-                if mb.exec() == QMessageBox.StandardButton.Yes:
-                    app.quit()
+                if neustartfrage:
+                    mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                    mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                    mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                    mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                    if mb.exec() == QMessageBox.StandardButton.Yes:
+                        sys.exit()
 
-    def einstellungenGdt(self):
+    def einstellungenGdt(self, neustartfrage = False):
         de = dialogEinstellungenGdt.EinstellungenGdt(self.configPath)
         if de.exec() == 1:
             self.configIni["GDT"]["idgerigdt"] = de.lineEditGeriGdtId.text()
@@ -671,14 +682,15 @@ class MainWindow(QMainWindow):
             self.configIni["GDT"]["zeichensatz"] = str(de.aktuelleZeichensatznummer + 1)
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                mb.setDefaultButton(QMessageBox.StandardButton.Yes)
-                mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
-                mb.button(QMessageBox.StandardButton.No).setText("Nein")
-                if mb.exec() == QMessageBox.StandardButton.Yes:
-                    app.quit()
+                if neustartfrage:
+                    mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                    mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                    mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                    mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                    if mb.exec() == QMessageBox.StandardButton.Yes:
+                        sys.exit()
 
-    def einstellungenBenutzer(self):
+    def einstellungenBenutzer(self, neustartfrage = False):
         de = dialogEinstellungenBenutzer.EinstellungenBenutzer(self.configPath)
         if de.exec() == 1:
             namen = []
@@ -691,26 +703,28 @@ class MainWindow(QMainWindow):
             self.configIni["Benutzer"]["kuerzel"] = "::".join(kuerzel)
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen in der Benutzerverwaltung wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                mb.setDefaultButton(QMessageBox.StandardButton.Yes)
-                mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
-                mb.button(QMessageBox.StandardButton.No).setText("Nein")
-                if mb.exec() == QMessageBox.StandardButton.Yes:
-                    app.quit()
+                if neustartfrage:
+                    mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                    mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                    mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                    mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                    if mb.exec() == QMessageBox.StandardButton.Yes:
+                        sys.exit()
 
-    def einstellungenLanrLizenzschluessel(self):
+    def einstellungenLanrLizenzschluessel(self, neustartfrage = False):
         de = dialogEinstellungenLanrLizenzschluessel.EinstellungenProgrammerweiterungen(self.configPath)
         if de.exec() == 1:
             self.configIni["Erweiterungen"]["lanr"] = de.lineEditLanr.text()
             self.configIni["Erweiterungen"]["lizenzschluessel"] = de.lineEditLizenzschluessel.text()
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
-                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Änderungen der GDT-Einstellungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                mb.setDefaultButton(QMessageBox.StandardButton.Yes)
-                mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
-                mb.button(QMessageBox.StandardButton.No).setText("Nein")
-                if mb.exec() == QMessageBox.StandardButton.Yes:
-                    app.quit()
+                if neustartfrage:
+                    mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT beendet werden.\nSoll GeriGDT jetzt beendet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                    mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                    mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                    mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                    if mb.exec() == QMessageBox.StandardButton.Yes:
+                        sys.exit()
     
     def gerigdtWiki(self, link):
         QDesktopServices.openUrl("https://www.github.com/retconx/gerigdt/wiki")
@@ -904,7 +918,7 @@ class MainWindow(QMainWindow):
                     mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Speichern der Dokumentation nicht möglich\nBitte überprüfen Sie die Angabe des Dokumentations-Speicherverzeichnisses.", QMessageBox.StandardButton.Ok)
                     mb.exec()
 
-        app.quit()
+        sys.exit()
 
     def dokuZusammenfassen(self, barthel:list, timedUpGo:int, kognitiveFunktion:int, pflegegrad:int):
         #Untersuchungsdatum TTMMJJJJ + 10x Barthel hexadezimal + TUG 0-3 + PG 0-6 (unbekannt = 0) + KF 0-2
