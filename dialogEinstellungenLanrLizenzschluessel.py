@@ -20,7 +20,7 @@ class EinstellungenProgrammerweiterungen(QDialog):
         configIni = configparser.ConfigParser()
         configIni.read(os.path.join(configPath, "config.ini"))
         self.lanr = configIni["Erweiterungen"]["lanr"]
-        self.lizenzschluessel = configIni["Erweiterungen"]["lizenzschluessel"]
+        self.lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(configIni["Erweiterungen"]["lizenzschluessel"])
 
         self.setWindowTitle("LANR und Lizenzschlüssel")
         self.setMinimumWidth(460)
@@ -63,8 +63,7 @@ class EinstellungenProgrammerweiterungen(QDialog):
             mb.exec()
             self.lineEditLanr.setFocus()
             self.lineEditLanr.selectAll()
-        # elif not re.match(reLizenzschluessel, self.lineEditLizenzschluessel.text()) or not gdttoolsL.GdtToolsLizenzschluessel.lanrGueltig(self.lineEditLanr.text(), self.lineEditLizenzschluessel.text()):
-        elif not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT):
+        elif not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT):
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR/lizenzschluessel-Kombination ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLizenzschluessel.setFocus()
