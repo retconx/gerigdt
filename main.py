@@ -592,6 +592,9 @@ class MainWindow(QMainWindow):
             hilfeUeberAction.setMenuRole(QAction.MenuRole.NoRole)
             hilfeUeberAction.triggered.connect(self.ueberGeriGdt) # type: ignore
             hilfeUeberAction.setShortcut(QKeySequence("Ctrl+Ü"))
+            hilfeLogExportieren = QAction("Log-Verzeichnis exportieren", self)
+            hilfeLogExportieren.triggered.connect(self.logExportieren) # type: ignore
+            hilfeLogExportieren.setShortcut(QKeySequence("Ctrl+D"))
             
             anwendungMenu.addAction(aboutAction)
             anwendungMenu.addAction(updateAction)
@@ -604,9 +607,16 @@ class MainWindow(QMainWindow):
             hilfeMenu.addAction(hilfeUpdateAction)
             hilfeMenu.addSeparator()
             hilfeMenu.addAction(hilfeUeberAction)
+            hilfeMenu.addSeparator()
+            hilfeMenu.addAction(hilfeLogExportieren)
             
             # Updateprüfung auf Github
-            self.updatePruefung(meldungNurWennUpdateVerfuegbar=True)
+            try:
+                self.updatePruefung(meldungNurWennUpdateVerfuegbar=True)
+            except Exception as e:
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Updateprüfung nicht möglich.\nBitte überprüfen Sie Ihre Internetverbindung.", QMessageBox.StandardButton.Ok)
+                mb.exec()
+                logger.warning("Updateprüfung nicht möglich: " + str(e))
         else:
             sys.exit()
 
@@ -691,8 +701,27 @@ class MainWindow(QMainWindow):
 
     def ueberGeriGdt(self):
         de = dialogUeberGeriGdt.UeberGeriGdt(self)
-        if de.exec() == 1:
-            pass
+        de.exec()
+
+    def logExportieren(self):
+        if (os.path.exists(os.path.join(basedir, "log"))):
+            downloadPath = ""
+            if sys.platform == "win32":
+                downloadPath = os.path.expanduser("~\\Downloads")
+            else:
+                downloadPath = os.path.expanduser("~/Downloads")
+            try:
+                if shutil.copytree(os.path.join(basedir, "log"), os.path.join(downloadPath, "Log_GeriGDT"), dirs_exist_ok=True):
+                    shutil.make_archive(os.path.join(downloadPath, "Log_GeriGDT"), "zip", root_dir=os.path.join(downloadPath, "Log_GeriGDT"))
+                    shutil.rmtree(os.path.join(downloadPath, "Log_GeriGDT"))
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Das Log-Verzeichnis wurde in den Ordner " + downloadPath + " kopiert", QMessageBox.StandardButton.Ok)
+                    mb.exec()
+            except Exception as e:
+                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Problem beim Download des Log-Verzeichnisses: " + str(e), QMessageBox.StandardButton.Ok)
+                mb.exec()
+        else:
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Das Log-Verzeichnis wurde nicht gefunden.", QMessageBox.StandardButton.Ok)
+            mb.exec() 
 
     def einstellungenAllgemein(self, neustartfrage = False):
         de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)

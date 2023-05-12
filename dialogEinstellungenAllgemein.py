@@ -32,6 +32,11 @@ class EinstellungenAllgemein(QDialog):
         self.buttonBox.accepted.connect(self.accept) # type: ignore
         self.buttonBox.rejected.connect(self.reject) # type: ignore
 
+        # Prüfen, ob Lizenzschlüssel verschlüsselt in config.ini
+        lizenzschluessel = configIni["Erweiterungen"]["lizenzschluessel"]
+        if len(lizenzschluessel) != 29:
+            lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(lizenzschluessel)
+
         dialogLayoutV = QVBoxLayout()
         # Groupbox Dokumentationsverwaltung
         groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
@@ -55,7 +60,7 @@ class EinstellungenAllgemein(QDialog):
         labelVorherigeDokuLaden.setStyleSheet("font-weight:normal")
         self.checkboxVorherigeDokuLaden = QCheckBox()
         self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
-        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
+        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(lizenzschluessel, configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
             labelKeineRegistrierung.setVisible(True)
             self.checkboxVorherigeDokuLaden.setEnabled(False)
             self.checkboxVorherigeDokuLaden.setChecked(False)
@@ -78,7 +83,7 @@ class EinstellungenAllgemein(QDialog):
         self.checkboxBmiUebernehmen = QCheckBox()
         self.checkboxBmiUebernehmen.setChecked(self.bmiuebernehmen)
         self.checkboxBmiUebernehmen.stateChanged.connect(self.checkboxBmiUebernehmenChanged) # type: ignore
-        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(configIni["Erweiterungen"]["lizenzschluessel"], configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
+        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(lizenzschluessel, configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
             labelKeineRegistrierung.setVisible(True)
             self.checkboxPdfErstellen.setEnabled(False)
             self.checkboxPdfErstellen.setChecked(False)
