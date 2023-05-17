@@ -21,8 +21,6 @@ from PySide6.QtWidgets import (
 )
 import requests
 
-
-
 basedir = os.path.dirname(__file__)
 # Gegebenenfalls pdf- und log-Verzeichnisse anlegen
 if not os.path.exists(os.path.join(basedir, "pdf")):
@@ -201,8 +199,8 @@ class MainWindow(QMainWindow):
             self.lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(self.lizenzschluessel)
 
         # Grundeinstellungen bei erstem Start
-        logger.info("Erster Start")
         if ersterStart:
+            logger.info("Erster Start")
             mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Vermutlich starten Sie GeriGDT das erste Mal auf diesem PC.\nMöchten Sie jetzt die Grundeinstellungen vornehmen?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             mb.setDefaultButton(QMessageBox.StandardButton.Yes)
             if mb.exec() == QMessageBox.StandardButton.Yes:
@@ -632,6 +630,10 @@ class MainWindow(QMainWindow):
             except IOError as e:
                 mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Lesen der vorherigen Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
                 mb.exec()
+        if len(doku) != 21:
+            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Die vorherige Dokumentation von " + self.name + " ist nicht lesbar.", QMessageBox.StandardButton.Ok)
+            mb.exec()
+            doku = ""
         if doku != "" and self.addOnsFreigeschaltet:
             # Untersuchungsdatum
             untdat = self.dokuZusammenfassungLesen(doku)[0]

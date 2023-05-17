@@ -9,12 +9,12 @@ class GdtFehlerException(Exception):
     def __str__(self):
         return "GDT-Fehler: " + self.Meldung
 
-def istGdtZeile(zeile:str):
+def istGdtZeile(zeile:str, laengenpruefung = False):
     """Prüft, ob es sich um eine gültige GDT-Zeile handelt."""
     if re.match(reGdtZeile, zeile):
         laenge = int(zeile[0:3])
         inhalt = zeile[7:len(zeile) - 2]
-        if laenge != (3 + 4 + len(inhalt)+ 2):
+        if laengenpruefung and laenge != (3 + 4 + len(inhalt)+ 2):
             raise GdtFehlerException("Zeilenlänge falsch: " + str(laenge) + " statt " + str(3 + 4 + len(inhalt) + 2))
         else:
             return True

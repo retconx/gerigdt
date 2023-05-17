@@ -64,7 +64,7 @@ class GdtTest:
         "8411_testBezeichnung" : testBezeichnung,
         "8420_testErgebnis" : testErgebnis,
         "8421_testEinheit" : testEinheit,
-        "8418_estStatus" : "",
+        "8418_testStatus" : "",
         "8428_probenmaterialIdent" : "",
         "8429_probenmaterialIndex" : "",
         "8430_probenmaterialBezeichnung" : "",
