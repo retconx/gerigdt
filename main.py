@@ -621,16 +621,29 @@ class MainWindow(QMainWindow):
     def mitVorherigerUntersuchungAusfuellen(self):
         pfad = self.dokuVerzeichnis + "/" + self.patId
         doku = ""
-        if os.path.exists(pfad) and len(os.listdir(pfad)) > 0:
-            dokus = [d for d in os.listdir(pfad) if os.path.isfile(pfad + "/" + d)]
-            dokus.sort()
-            try:
-                with open(pfad + "/" + dokus[len(dokus) - 1], "r") as d:
-                    doku = d.read()
-            except IOError as e:
-                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Lesen der vorherigen Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
-                mb.exec()
-        if len(doku) != 21:
+        if os.path.exists(self.dokuVerzeichnis):
+            if os.path.exists(pfad) and len(os.listdir(pfad)) > 0:
+                dokus = [d for d in os.listdir(pfad) if os.path.isfile(pfad + "/" + d)]
+                dokus.sort()
+                try:
+                    with open(pfad + "/" + dokus[len(dokus) - 1], "r") as d:
+                        doku = d.read().strip()
+                except IOError as e:
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Lesen der vorherigen Dokumentation.\nSoll GeriGDT neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                    mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                    mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                    mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                    if mb.exec() == QMessageBox.StandardButton.Yes:
+                        os.execl(sys.executable, __file__, *sys.argv)
+        else:
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Das Archivierungsverzeichnis " + self.dokuVerzeichnis + "  ist nicht erreichbar. Vorherige Assessments können daher nicht geladen werden.\nFalls es sich um eine Netzwerkfreigabe handeln sollte, stellen Sie die entsprechende Verbindung sicher und starten GeriGDT neu.\nSoll GeriGDT neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+            mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+            mb.button(QMessageBox.StandardButton.No).setText("Nein")
+            if mb.exec() == QMessageBox.StandardButton.Yes:
+                os.execl(sys.executable, __file__, *sys.argv)  
+                
+        if doku != "" and len(doku) != 21:
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Die vorherige Dokumentation von " + self.name + " ist nicht lesbar.", QMessageBox.StandardButton.Ok)
             mb.exec()
             doku = ""
@@ -702,7 +715,7 @@ class MainWindow(QMainWindow):
             mb.exec()
 
     def ueberGeriGdt(self):
-        de = dialogUeberGeriGdt.UeberGeriGdt(self)
+        de = dialogUeberGeriGdt.UeberGeriGdt()
         de.exec()
 
     def logExportieren(self):

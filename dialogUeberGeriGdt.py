@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import Qt, QDesktopServices
 
 class UeberGeriGdt(QDialog):
-    def __init__(self, configPath):
+    def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Über GeriGDT")
