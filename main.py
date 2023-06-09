@@ -156,13 +156,15 @@ class MainWindow(QMainWindow):
                 mb.exec()
                 self.configPath = basedir
         else:
-            logging.critical("config.ini fehlt")
+            logger.critical("config.ini fehlt")
             mb = QMessageBox(QMessageBox.Icon.Critical, "Hinweis von GeriGDT", "Die Konfigurationsdatei config.ini fehlt. GeriGDT kann nicht gestartet werden.", QMessageBox.StandardButton.Ok)
             mb.exec()
             sys.exit()
         self.configIni.read(os.path.join(self.configPath, "config.ini"))
         self.gdtImportVerzeichnis = self.configIni["GDT"]["gdtimportverzeichnis"]
         self.gdtExportVerzeichnis = self.configIni["GDT"]["gdtexportverzeichnis"]
+        self.kuerzelgerigdt = self.configIni["GDT"]["kuerzelgerigdt"]
+        self.kuerzelpraxisedv = self.configIni["GDT"]["kuerzelpraxisedv"]
         self.benutzernamen = self.configIni["Benutzer"]["namen"].split("::")
         self.benutzerkuerzel = self.configIni["Benutzer"]["kuerzel"].split("::")
         self.aktuelleBenuztzernummer = 0
@@ -259,7 +261,7 @@ class MainWindow(QMainWindow):
         self.gewicht = "-"
         mbErg = QMessageBox.StandardButton.Yes
         try:
-            gd.laden(self.gdtImportVerzeichnis + "/GERIT2MD.gdt", self.zeichensatz, self.configIni["GDT"]["idpraxisedv"])
+            gd.laden(self.gdtImportVerzeichnis + "/" + self.kuerzelgerigdt + self.kuerzelpraxisedv + ".gdt", self.zeichensatz, self.configIni["GDT"]["idpraxisedv"])
             self.patId = str(gd.getInhalt("3000"))
             self.name = str(gd.getInhalt("3102")) + " " + str(gd.getInhalt("3101"))
             logger.info("PatientIn " + self.name + " (ID: " + self.patId + ") geladen")
@@ -1005,8 +1007,8 @@ class MainWindow(QMainWindow):
                 logger.error("Fehler bei PDF-Output nach " + os.path.join(basedir, "pdf/geriass_temp.pdf"))
             
         # GDT-Datei exportieren
-        if not gd.speichern(self.gdtExportVerzeichnis + "/T2MDGERI.gdt", self.zeichensatz):
-            logger.error("Fehler bei GDT-Dateiexport nach " + self.gdtExportVerzeichnis + "/T2MDGERI.gdt")
+        if not gd.speichern(self.gdtExportVerzeichnis + "/" + self.kuerzelpraxisedv + self.kuerzelgerigdt + ".gdt", self.zeichensatz):
+            logger.error("Fehler bei GDT-Dateiexport nach " + self.gdtExportVerzeichnis + "/" + self.kuerzelpraxisedv + self.kuerzelgerigdt + ".gdt")
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "GDT-Export nicht möglich.\nBitte überprüfen Sie die Angabe des Exportverzeichnisses.", QMessageBox.StandardButton.Ok)
             mb.exec()
         else:
