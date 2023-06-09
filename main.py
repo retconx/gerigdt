@@ -218,6 +218,7 @@ class MainWindow(QMainWindow):
             if versionVeraltet(self.version, configIniBase["Allgemein"]["version"]):
                 # Version aktualisieren
                 self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
+                self.configIni["Allgemein"]["releasedatum"] = configIniBase["Allgemein"]["releasedatum"] 
                 # config.ini aktualisieren
                 # 3.2.1 -> 3.2.2: ["Allgemein"]["pdferstellen"], ["Allgemein"]["bmiuebernehmen"] und pdf-Ordner hinzufügen
                 if not self.configIni.has_option("Allgemein", "pdferstellen"):
