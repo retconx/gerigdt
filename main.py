@@ -262,7 +262,11 @@ class MainWindow(QMainWindow):
         self.gewicht = "-"
         mbErg = QMessageBox.StandardButton.Yes
         try:
-            gd.laden(self.gdtImportVerzeichnis + "/" + self.kuerzelgerigdt + self.kuerzelpraxisedv + ".gdt", self.zeichensatz, self.configIni["GDT"]["idpraxisedv"])
+            # Prüfen, ob PVS-GDT-ID eingetragen
+            senderId = self.configIni["GDT"]["idpraxisedv"]
+            if senderId == "":
+                senderId = None
+            gd.laden(self.gdtImportVerzeichnis + "/" + self.kuerzelgerigdt + self.kuerzelpraxisedv + ".gdt", self.zeichensatz, senderId)
             self.patId = str(gd.getInhalt("3000"))
             self.name = str(gd.getInhalt("3102")) + " " + str(gd.getInhalt("3101"))
             logger.info("PatientIn " + self.name + " (ID: " + self.patId + ") geladen")

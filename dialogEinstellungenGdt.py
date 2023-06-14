@@ -51,17 +51,21 @@ class EinstellungenGdt(QDialog):
         labelGeriGdt.setStyleSheet("font-weight:normal")
         labelPraxisEdv = QLabel("Praxis-EDV:")
         labelPraxisEdv.setStyleSheet("font-weight:normal")
+        labelGdtIdHinweis = QLabel("Hinweis: Wird keine Praxis-EDV-ID eingetragen, erfolgt beim Empfang der \nGDT-Datei von der Praxis-EDV keine Übereinstimmungsprüfung der ID.")
+        labelGdtIdHinweis.setStyleSheet("font-weight:normal")
         self.lineEditGeriGdtId = QLineEdit(self.idGeriGdt)
         self.lineEditGeriGdtId.setStyleSheet("font-weight:normal")
         self.lineEditGeriGdtId.setEnabled(False)
         self.lineEditPraxisEdvId = QLineEdit(self.idPraxisEdv)
         self.lineEditPraxisEdvId.setStyleSheet("font-weight:normal")
-        groupboxLayoutH.addWidget(labelGeriGdt)
-        groupboxLayoutH.addWidget(self.lineEditGeriGdtId)
-        groupboxLayoutH.addWidget(labelPraxisEdv)
-        groupboxLayoutH.addWidget(self.lineEditPraxisEdvId)
-        groupboxGdtIds.setLayout(groupboxLayoutH)
+        groupboxLayoutG.addWidget(labelGeriGdt, 0, 0)
+        groupboxLayoutG.addWidget(self.lineEditGeriGdtId, 0, 1)
+        groupboxLayoutG.addWidget(labelPraxisEdv, 0, 2)
+        groupboxLayoutG.addWidget(self.lineEditPraxisEdvId, 0, 3)
+        groupboxLayoutG.addWidget(labelGdtIdHinweis, 1, 0, 1, 4)
+        groupboxGdtIds.setLayout(groupboxLayoutG)
         # Groupbox Austauschverzeichnisse
+        groupboxLayoutG = QGridLayout()
         groupboxAustauschverzeichnisse = QGroupBox("Austauschverzeichnisse")
         groupboxAustauschverzeichnisse.setStyleSheet("font-weight:bold")
         labelImport = QLabel("Import:")
@@ -169,7 +173,7 @@ class EinstellungenGdt(QDialog):
         self.aktuelleZeichensatznummer = self.combobxZeichensatz.currentIndex()
 
     def accept(self):
-        if len(self.lineEditPraxisEdvId.text()) != 8:
+        if len(self.lineEditPraxisEdvId.text()) != 8 and len(self.lineEditPraxisEdvId.text()) != 0:
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die GDT-ID muss aus acht Zeichen bestehen.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditPraxisEdvId.setFocus()
