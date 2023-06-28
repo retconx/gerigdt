@@ -26,6 +26,7 @@ class EinstellungenAllgemein(QDialog):
         self.vorherigeDokuLaden = configIni["Allgemein"]["vorherigedokuladen"] == "1"
         self.pdferstellen = configIni["Allgemein"]["pdferstellen"] == "1"
         self.bmiuebernehmen = configIni["Allgemein"]["bmiuebernehmen"] == "1"
+        
         self.setWindowTitle("Allgemeine Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")
