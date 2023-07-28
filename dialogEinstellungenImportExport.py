@@ -115,24 +115,28 @@ class EinstellungenImportExport(QDialog):
                 datei = fd.selectedFiles()[0]
                 configImport = configparser.ConfigParser()
                 configImport.read(datei)
-                i=0
-                for section in configImport.sections():
-                    if self.checkboxEinstellungen[i].isChecked():
-                        for option in configImport.options(section):
-                            self.configIni[section][option] = configImport.get(section, option)
-                    i += 1
-                try:
-                    with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
-                        self.configIni.write(configfile)
-                    self.done(1)
-                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die Einstellungen wurden erfolgreich importiert. Damit diese wirksam werden, muss GeriGDT neu gestartet werden.\nSoll GeriGDT neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                    mb.setDefaultButton(QMessageBox.StandardButton.Yes)
-                    mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
-                    mb.button(QMessageBox.StandardButton.No).setText("Nein")
-                    if mb.exec() == QMessageBox.StandardButton.Yes:
-                        os.execl(sys.executable, __file__, *sys.argv)
-                except Exception as e:
-                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Importieren der Einstellungen: " + str(e), QMessageBox.StandardButton.Ok)
+                if "Allgemein" in configImport.sections() or "GDT" in configImport.sections() or "Benutzer" in configImport.sections() or "Erweiterungen" in configImport.sections():
+                    i=0
+                    for section in configImport.sections():
+                        if self.checkboxEinstellungen[i].isChecked():
+                            for option in configImport.options(section):
+                                self.configIni[section][option] = configImport.get(section, option)
+                        i += 1
+                    try:
+                        with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                            self.configIni.write(configfile)
+                        self.done(1)
+                        mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die Einstellungen wurden erfolgreich importiert. Damit diese wirksam werden, muss GeriGDT neu gestartet werden.\nSoll GeriGDT neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                        mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                        mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                        mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                        if mb.exec() == QMessageBox.StandardButton.Yes:
+                            os.execl(sys.executable, __file__, *sys.argv)
+                    except Exception as e:
+                        mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Importieren der Einstellungen: " + str(e), QMessageBox.StandardButton.Ok)
+                        mb.exec()
+                else:
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die Datei " + datei + " ist keine gültige GeriGDT-Konfigurationsdatei", QMessageBox.StandardButton.Ok)
                     mb.exec()
         else:
             fd = QFileDialog(self)

@@ -2,8 +2,8 @@ import sys, configparser, os, datetime, shutil,logger
 import gdt, gdtzeile, gdttoolsL
 import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport
 import geriasspdf
-from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo
-from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices
+from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QEvent
+from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices, QKeyEvent
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QDateEdit,
     QComboBox,
     QMessageBox, 
+    QCheckBox
 )
 import requests
 
@@ -95,6 +96,7 @@ class MainWindow(QMainWindow):
     timedUpGo = ["< 10 Sekunden - keine Mobilitätseinschränkung", "11-19 Sekunden - leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - starke Mobilitätseinschränkung"]
     kognitiveFunktion = ["Keine oder leichte Einschränkung", "Mittlere Einschränkung", "Schwere Einschränkung"]
     pflegegrad = ["1", "2", "3", "4", "5", "Nicht vorhanden/unbekannt", "Beantragt"]
+    verfuegungen = ["Patientenverfügung", "Vorsorgevollmacht", "Betreuungsverfügung"]
 
     # Mainwindow zentrieren
     def resizeEvent(self, e):
@@ -286,9 +288,10 @@ class MainWindow(QMainWindow):
             mb.setDefaultButton(QMessageBox.StandardButton.No)
             mbErg = mb.exec()
         if mbErg == QMessageBox.StandardButton.Yes:
-            widget = QWidget()
+            self.widget = QWidget()
+            self.widget.installEventFilter(self)
             mainLayout = QVBoxLayout()
-            kopfLayout= QHBoxLayout()
+            kopfLayout = QHBoxLayout()
             kopfLayout.setAlignment(Qt.AlignmentFlag.AlignRight)
             titelLabel = QLabel("Geriatrisches Basisassessment")
             titelLabel.setStyleSheet("font-weight:bold;font-size:26px")
@@ -498,6 +501,18 @@ class MainWindow(QMainWindow):
             groupboxPflegegrad.setLayout(groupboxLayout)
             groupboxPflegegrad.setFont(fontBold)
 
+            groupboxLayout = QVBoxLayout()
+            groupboxVerfuegungen = QGroupBox("Verfügungen/Vollmachten")
+            self.checkboxVerfuegungen = []
+            for checkbox in self.verfuegungen:
+                cb = QCheckBox(text=checkbox)
+                cb.setFont(font)
+                cb.stateChanged.connect(self.verfuegungGeklickt) # type: ignore
+                self.checkboxVerfuegungen.append(cb)
+                groupboxLayout.addWidget(cb)
+            groupboxVerfuegungen.setLayout(groupboxLayout)
+            groupboxVerfuegungen.setFont(fontBold)
+
             testLayout.addWidget(barthelLabel, 0, 0, alignment=Qt.AlignmentFlag.AlignCenter)
             testLayout.addWidget(self.labelBarthelGesamt, 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
             testLayout.addWidget(groupboxBarthelEssen, 1, 0)
@@ -512,7 +527,8 @@ class MainWindow(QMainWindow):
             testLayout.addWidget(groupboxBarthelTreppensteigen, 5, 1)
             testLayout.addWidget(groupboxTimedUpGo, 1, 2)
             testLayout.addWidget(groupboxKognitiveFunktion, 2, 2)
-            testLayout.addWidget(groupboxPflegegrad, 3, 2, 2, 1)
+            testLayout.addWidget(groupboxPflegegrad, 3, 2)
+            testLayout.addWidget(groupboxVerfuegungen, 4, 2)
             datenLayoutH = QHBoxLayout()
             datenLayoutG = QGridLayout()
             labelName = QLabel("Name:")
@@ -543,21 +559,21 @@ class MainWindow(QMainWindow):
             datenLayoutG.addWidget(self.untdatEdit, 2, 1)
             datenLayoutG.addWidget(labelDokuVon, 3, 0)
             datenLayoutG.addWidget(self.dokuvonComboBox, 3, 1)
-            pushbuttonDatenSenden = QPushButton("Daten senden")
-            pushbuttonDatenSenden.setFixedSize(QSize(160, 80))
+            self.pushbuttonDatenSenden = QPushButton("Daten senden")
+            self.pushbuttonDatenSenden.setFixedSize(QSize(160, 80))
             if self.patId == "-":
-                pushbuttonDatenSenden.setEnabled(False)
-                pushbuttonDatenSenden.setToolTip("Senden nicht möglich, da keine GDT-Datei vom PVS geladen")
-            pushbuttonDatenSenden.clicked.connect(self.datenSendenClicked) # type: ignore
+                self.pushbuttonDatenSenden.setEnabled(False)
+                self.pushbuttonDatenSenden.setToolTip("Senden nicht möglich, da keine GDT-Datei vom PVS geladen")
+            self.pushbuttonDatenSenden.clicked.connect(self.datenSendenClicked) # type: ignore
             datenLayoutH.addLayout(datenLayoutG)
             datenLayoutH.addSpacing(20)
-            datenLayoutH.addWidget(pushbuttonDatenSenden)
+            datenLayoutH.addWidget(self.pushbuttonDatenSenden)
             testLayout.addLayout(datenLayoutH, 5, 2)
             mainLayout.addLayout(kopfLayout)
             mainLayout.addLayout(testLayout)
-            widget.setLayout(mainLayout)
+            self.widget.setLayout(mainLayout)
 
-            self.setCentralWidget(widget)
+            self.setCentralWidget(self.widget)
 
             # Menü
             menubar = self.menuBar()
@@ -632,6 +648,13 @@ class MainWindow(QMainWindow):
         else:
             sys.exit()
 
+    def eventFilter(self, object, event:QEvent):
+        if object == self.widget and event.type() == QEvent.Type.KeyPress and (event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter):
+            #self.datenSendenClicked()
+            self.pushbuttonDatenSenden.click()
+            return True
+        return False
+
     def mitVorherigerUntersuchungAusfuellen(self):
         pfad = self.dokuVerzeichnis + "/" + self.patId
         doku = ""
@@ -657,7 +680,7 @@ class MainWindow(QMainWindow):
             if mb.exec() == QMessageBox.StandardButton.Yes:
                 os.execl(sys.executable, __file__, *sys.argv)  
                 
-        if doku != "" and len(doku) != 21:
+        if doku != "" and len(doku) != 21 and len(doku) != 22: # 22 für Verfügungen (seit Version 3.8.0)
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Die vorherige Dokumentation von " + self.name + " ist nicht lesbar.", QMessageBox.StandardButton.Ok)
             mb.exec()
             doku = ""
@@ -684,6 +707,7 @@ class MainWindow(QMainWindow):
             tug = int(self.dokuZusammenfassungLesen(doku)[2])
             pg = int(self.dokuZusammenfassungLesen(doku)[3])
             kf = int(self.dokuZusammenfassungLesen(doku)[4])
+            vf = int(self.dokuZusammenfassungLesen(doku)[5])
             if pg == 0:
                 pg = 5
             elif pg == 5:
@@ -693,6 +717,9 @@ class MainWindow(QMainWindow):
             self.radiobuttonTimedUpGo[tug].setChecked(True)
             self.radiobuttonPflegegrad[pg].setChecked(True)
             self.radiobuttonKognitiveFunktion[kf].setChecked(True)
+            self.checkboxVerfuegungen[0].setChecked(vf & 0b001 == 0b001)
+            self.checkboxVerfuegungen[1].setChecked(vf & 0b010 == 0b010)
+            self.checkboxVerfuegungen[2].setChecked(vf & 0b100 == 0b100)
         else:
             self.changeStatus(1, "-")
             self.buttonAlteUntersuchung.setEnabled(False)
@@ -702,6 +729,8 @@ class MainWindow(QMainWindow):
         barthelGesamt = self.barthelBerechnen()[1]
         self.labelBarthelGesamt.setText("Gesamt: " + str(barthelGesamt) + " Punkte")
 
+    def verfuegungGeklickt(self):
+        pass
 
     def vorherigeUntersuchungWiederherstellen(self):
         if self.vorherigeDokuLaden:
@@ -938,6 +967,24 @@ class MainWindow(QMainWindow):
         testPflegegrad = gdt.GdtTest("PFLEGEGRAD", "Pflegegrad", pgErgebnis, "")
         gd.addTest(testPflegegrad)
         logger.logger.info("PG-Test erzeugt")
+        # Verfügungen
+        vfErgebis = 0b000
+        if self.checkboxVerfuegungen[0].isChecked(): # Patientenverfügung
+            vfErgebis += 0b001
+        if self.checkboxVerfuegungen[1].isChecked(): # Vorsorgevollmacht
+            vfErgebis += 0b010
+        if self.checkboxVerfuegungen[2].isChecked(): # Betreuungsverfügung
+            vfErgebis += 0b100
+        vfTextListe = []
+        for i in range(3):
+            if self.checkboxVerfuegungen[i].isChecked():
+                vfTextListe.append(self.verfuegungen[i])
+        vfErgebnistext = "Keine Angabe"
+        if len(vfTextListe) > 0:
+            vfErgebnistext = ", ".join(vfTextListe)
+        testVerfuegungen = gdt.GdtTest("VERFUEGUNGEN", "Verfügungen/Vollmachten", vfErgebnistext, "")
+        gd.addTest(testVerfuegungen)
+        logger.logger.info("Verfügungen-Test erzeugt")
         # Benutzer
         ak = self.aktuelleBenuztzernummer
         gd.addZeile("6227", "Dokumentiert von " + self.benutzerkuerzel[int(self.aktuelleBenuztzernummer)])
@@ -946,6 +993,7 @@ class MainWindow(QMainWindow):
         gd.addZeile("6221", "Timed \"Up and Go\": " + str(tugErgebnis))
         gd.addZeile("6221", "Kognitive Funktion: " + str(kfErgebnis))
         gd.addZeile("6221", "Pflegegrad: " + str(pgErgebnis))
+        gd.addZeile("6221", "Verfügungen/Vollmachten: " + vfErgebnistext)
         logger.logger.info("Befund/Fremdbefunde erzeugt")
 
         # PDF erzeugen
@@ -1010,8 +1058,14 @@ class MainWindow(QMainWindow):
             pdf.cell(0, 8, "Pflegegrad", new_x="LMARGIN", new_y="NEXT")
             pdf.set_font(style="")
             pdf.cell(30, 10, "Ergebnis:")
-            pdf.cell(0, 10, pgErgebnis, align="R", new_x="LMARGIN")
-            #pdf.cell(0, 46, new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(0, 10, pgErgebnis, align="R", new_x="LMARGIN", new_y="NEXT")
+            # Verfügungen
+            pdf.cell(0, 4, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="B")
+            pdf.cell(0, 8, "Erstellte Verfügungen/Vollmachten", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(style="")
+            pdf.cell(0, 10, vfErgebnistext)
+
             pdf.set_y(-30)
             pdf.set_font("helvetica", "I", 10)
             pdf.cell(0, 10, "Generiert von GeriGDT V" + self.version + " (\u00a9 GDT-Tools " + str(datetime.date.today().year) + ")", align="R")
@@ -1028,7 +1082,7 @@ class MainWindow(QMainWindow):
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "GDT-Export nicht möglich.\nBitte überprüfen Sie die Angabe des Exportverzeichnisses.", QMessageBox.StandardButton.Ok)
             mb.exec()
         else:
-            dokuZusammenfassung = self.dokuZusammenfassen(barthelEinzel, tugErgebnisInt, kfErgebnisInt, pgErgebnisInt)
+            dokuZusammenfassung = self.dokuZusammenfassen(barthelEinzel, tugErgebnisInt, kfErgebnisInt, pgErgebnisInt, vfErgebis)
             if self.dokuVerzeichnis != "":
                 if os.path.exists(self.dokuVerzeichnis):
                     speicherdatum = str(self.untdatEdit.date().year()) + "{:>02}".format(str(self.untdatEdit.date().month())) + "{:>02}".format(str(self.untdatEdit.date().day()))
@@ -1052,8 +1106,8 @@ class MainWindow(QMainWindow):
                     mb.exec()
         sys.exit()
 
-    def dokuZusammenfassen(self, barthel:list, timedUpGo:int, kognitiveFunktion:int, pflegegrad:int):
-        #Untersuchungsdatum TTMMJJJJ + 10x Barthel hexadezimal + TUG 0-3 + PG 0-6 (unbekannt = 0) + KF 0-2
+    def dokuZusammenfassen(self, barthel:list, timedUpGo:int, kognitiveFunktion:int, pflegegrad:int, verfuegungen:int):
+        # Untersuchungsdatum TTMMJJJJ + 10x Barthel hexadezimal + TUG 0-3 + PG 0-6 (unbekannt = 0) + KF 0-2
         zusammenfassung = self.datum
         for b in barthel:
             punkte = int(b)
@@ -1064,7 +1118,7 @@ class MainWindow(QMainWindow):
             pflegegrad = 0
         elif pflegegrad == 7:
             pflegegrad = 6
-        zusammenfassung += str(timedUpGo) + str(pflegegrad) + str(kognitiveFunktion)
+        zusammenfassung += str(timedUpGo) + str(pflegegrad) + str(kognitiveFunktion) + str(verfuegungen)
         return zusammenfassung
     
     def dokuZusammenfassungLesen(self, zusammenfassung:str):
@@ -1078,7 +1132,11 @@ class MainWindow(QMainWindow):
         tug = zusammenfassung[18]
         pg = zusammenfassung[19]
         kf = zusammenfassung[20]
-        return (datum, barthelGesamt, tug, pg, kf)
+        # Gegebenenfalls Verfügungen (ab Version 3.8.0)
+        vf = 0
+        if len(zusammenfassung) == 22:
+            vf = zusammenfassung[21]
+        return (datum, barthelGesamt, tug, pg, kf, vf)
     
     def gdtToolsLinkGeklickt(self, link):
         QDesktopServices.openUrl(link)
