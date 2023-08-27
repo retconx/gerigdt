@@ -175,6 +175,10 @@ class MainWindow(QMainWindow):
         self.vorherigeDokuLaden = (self.configIni["Allgemein"]["vorherigedokuladen"] == "1")
 
         # Nachträglich hinzufefügte Options
+        # 3.9.0
+        self.pdfbezeichnung = "Geriatrisches Basisassessment"
+        if self.configIni.has_option("Allgemein", "pdfbezeichnung"):
+            self.pdfbezeichnung = self.configIni["Allgemein"]["pdfbezeichnung"]
         # 3.2.2
         self.pdferstellen = False
         if self.configIni.has_option("Allgemein", "pdferstellen"):
@@ -222,6 +226,9 @@ class MainWindow(QMainWindow):
                 self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
                 self.configIni["Allgemein"]["releasedatum"] = configIniBase["Allgemein"]["releasedatum"] 
                 # config.ini aktualisieren
+                # 3.8.0 -> 3.9.0: ["Allgemein"]["pdfbezeichnung"] hinzufügen
+                if not self.configIni.has_option("Allgemein", "pdfbezeichnung"):
+                    self.configIni["Allgemein"]["pdfbezeichnung"] = "Geriatrisches Basisassessment"
                 # 3.2.1 -> 3.2.2: ["Allgemein"]["pdferstellen"], ["Allgemein"]["bmiuebernehmen"] und pdf-Ordner hinzufügen
                 if not self.configIni.has_option("Allgemein", "pdferstellen"):
                     self.configIni["Allgemein"]["pdferstellen"] = "0"
@@ -650,7 +657,6 @@ class MainWindow(QMainWindow):
 
     def eventFilter(self, object, event:QEvent):
         if object == self.widget and event.type() == QEvent.Type.KeyPress and (event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter):
-            #self.datenSendenClicked()
             self.pushbuttonDatenSenden.click()
             return True
         return False
@@ -794,6 +800,7 @@ class MainWindow(QMainWindow):
             self.configIni["Allgemein"]["bmiuebernehmen"] = "0"
             if de.checkboxBmiUebernehmen.isChecked():
                 self.configIni["Allgemein"]["bmiuebernehmen"] = "1"  
+            self.configIni["Allgemein"]["pdfbezeichnung"] = de.lineEditPdfBezeichnung.text()
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
@@ -907,7 +914,7 @@ class MainWindow(QMainWindow):
         if self.pdferstellen:
             gd.addZeile("6302", "geri_ass")
             gd.addZeile("6303", "pdf")
-            gd.addZeile("6304", "Geriatrisches Basisassessment")
+            gd.addZeile("6304", self.pdfbezeichnung)
             gd.addZeile("6305", os.path.join(basedir, "pdf/geriass_temp.pdf"))
         # Barthel
         testBarthelEssen = gdt.GdtTest("ESSEN", "Essen", str(barthelEinzel[0]), " von 10 Punkten")

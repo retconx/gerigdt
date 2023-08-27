@@ -1,8 +1,8 @@
-import configparser, os, gdttoolsL
+import configparser, os, gdttoolsL, re
+from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
-    QHBoxLayout,
     QVBoxLayout,
     QGridLayout,
     QGroupBox,
@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QCheckBox,
     QFileDialog,
+    QMessageBox
 )
 
 class EinstellungenAllgemein(QDialog):
@@ -26,7 +27,8 @@ class EinstellungenAllgemein(QDialog):
         self.vorherigeDokuLaden = configIni["Allgemein"]["vorherigedokuladen"] == "1"
         self.pdferstellen = configIni["Allgemein"]["pdferstellen"] == "1"
         self.bmiuebernehmen = configIni["Allgemein"]["bmiuebernehmen"] == "1"
-        
+        self.pdfbezeichnung = configIni["Allgemein"]["pdfbezeichnung"] 
+
         self.setWindowTitle("Allgemeine Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Abbrechen")
@@ -90,12 +92,20 @@ class EinstellungenAllgemein(QDialog):
             self.checkboxPdfErstellen.setChecked(False)
             self.checkboxBmiUebernehmen.setEnabled(False)
             self.checkboxBmiUebernehmen.setChecked(False)
+        labelPdfBezeichnung = QLabel("PDF-Bezeichnung in Karteikarte:")
+        labelPdfBezeichnung.setStyleSheet("font-weight:normal")
+        self.lineEditPdfBezeichnung = QLineEdit(self.pdfbezeichnung)
+        self.lineEditPdfBezeichnung.setStyleSheet("font-weight:normal")
+        self.lineEditPdfBezeichnung.setPlaceholderText("Geriatrisches Basisassessment")
+
         groupboxLayoutPdfErstellung = QGridLayout()
         groupboxLayoutPdfErstellung.addWidget(labelKeineRegistrierung, 0, 0, 1, 2)
         groupboxLayoutPdfErstellung.addWidget(labelPdfErstellen, 1, 0)
         groupboxLayoutPdfErstellung.addWidget(self.checkboxPdfErstellen, 1, 1)
         groupboxLayoutPdfErstellung.addWidget(labelBmiUebernehmen, 2, 0)
         groupboxLayoutPdfErstellung.addWidget(self.checkboxBmiUebernehmen, 2, 1)
+        groupboxLayoutPdfErstellung.addWidget(labelPdfBezeichnung, 3, 0)
+        groupboxLayoutPdfErstellung.addWidget(self.lineEditPdfBezeichnung, 4, 0)
         groupboxPdfErstellung.setLayout(groupboxLayoutPdfErstellung)
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
@@ -124,3 +134,16 @@ class EinstellungenAllgemein(QDialog):
     def checkboxBmiUebernehmenChanged(self, newState):
         if newState:
             self.checkboxPdfErstellen.setChecked(True)
+
+    def accept(self):
+        regexPattern = "[/.,]"
+        test = re.search(regexPattern, self.lineEditPdfBezeichnung.text())
+        if test != None:
+            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Die PDF-Bezeichnung enthält unerlaubte Zeichen (" + regexPattern[1:-1] + ")", QMessageBox.StandardButton.Ok)
+            mb.exec()
+            self.lineEditPdfBezeichnung.setFocus()
+            self.lineEditPdfBezeichnung.selectAll()
+        else:
+            if self.lineEditPdfBezeichnung.text() == "":
+                self.lineEditPdfBezeichnung.setText(self.lineEditPdfBezeichnung.placeholderText())
+            self.done(1)
