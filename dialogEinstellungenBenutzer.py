@@ -17,6 +17,7 @@ class EinstellungenBenutzer(QDialog):
         #config.ini lesen
         configIni = configparser.ConfigParser()
         configIni.read(os.path.join(configPath, "config.ini"))
+        self.einrichtungsname = configIni["Benutzer"]["einrichtung"]
         self.benutzernamen = (configIni["Benutzer"]["namen"]).split("::")
         self.benutzerkuerzel = (configIni["Benutzer"]["kuerzel"]).split("::")
 
@@ -30,6 +31,12 @@ class EinstellungenBenutzer(QDialog):
         dialogLayoutV = QVBoxLayout()
         dialogLayoutG = QGridLayout()
 
+        labelEinrichtungsname = QLabel("Name der Einrichtung")
+        self.lineEditEinrichtungsname = QLineEdit(self.einrichtungsname)
+        self.lineEditEinrichtungsname.setPlaceholderText("Hausarztpraxis XY")
+        dialogLayoutV.addWidget(labelEinrichtungsname)
+        dialogLayoutV.addWidget(self.lineEditEinrichtungsname)
+        
         self.labelNamen = QLabel("Name")
         self.labelKuerzel = QLabel("Kürzel")
         dialogLayoutG.addWidget(self.labelNamen, 0, 0)
@@ -39,6 +46,7 @@ class EinstellungenBenutzer(QDialog):
         for i in range(5):
             self.lineEditNamen.append(QLineEdit())
             dialogLayoutG.addWidget(self.lineEditNamen[i], i + 1, 0)
+        self.lineEditNamen[0].setPlaceholderText("Dr. med. XY")
         for i in range(5):
             self.lineEditKuerzel.append(QLineEdit())
             self.lineEditKuerzel[i].setFixedWidth(40)

@@ -175,6 +175,16 @@ class MainWindow(QMainWindow):
         self.vorherigeDokuLaden = (self.configIni["Allgemein"]["vorherigedokuladen"] == "1")
 
         # Nachträglich hinzufefügte Options
+        # 3.10.0
+        self.benutzeruebernehmen = False
+        if self.configIni.has_option("Allgemein", "benutzeruebernehmen"):
+            self.benutzeruebernehmen = (self.configIni["Allgemein"]["benutzeruebernehmen"] == "1")
+        self.einrichtunguebernehmen = False
+        if self.configIni.has_option("Allgemein", "einrichtunguebernehmen"):
+            self.einrichtunguebernehmen = (self.configIni["Allgemein"]["einrichtunguebernehmen"] == "1")
+        self.einrichtung = ""
+        if self.configIni.has_option("Benutzer", "einrichtung"):
+            self.einrichtung = self.configIni["Benutzer"]["einrichtung"]
         # 3.9.0
         self.pdfbezeichnung = "Geriatrisches Basisassessment"
         if self.configIni.has_option("Allgemein", "pdfbezeichnung"):
@@ -226,6 +236,13 @@ class MainWindow(QMainWindow):
                 self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
                 self.configIni["Allgemein"]["releasedatum"] = configIniBase["Allgemein"]["releasedatum"] 
                 # config.ini aktualisieren
+                # 3.9.0 -> 3.10.0: ["Allgemein"]["benutzeruebernehmen"], ["Allgemein"]["einrichtunguebernehmen"] und ["Benutzer"]["einrichtung"] hinzufügen
+                if not self.configIni.has_option("Allgemein", "benutzeruebernehmen"):
+                    self.configIni["Allgemein"]["benutzeruebernehmen"] = "0"
+                if not self.configIni.has_option("Allgemein", "einrichtunguebernehmen"):
+                    self.configIni["Allgemein"]["einrichtunguebernehmen"] = "0"
+                if not self.configIni.has_option("Benutzer", "einrichtung"):
+                    self.configIni["Benutzer"]["einrichtung"] = ""
                 # 3.8.0 -> 3.9.0: ["Allgemein"]["pdfbezeichnung"] hinzufügen
                 if not self.configIni.has_option("Allgemein", "pdfbezeichnung"):
                     self.configIni["Allgemein"]["pdfbezeichnung"] = "Geriatrisches Basisassessment"
@@ -801,6 +818,12 @@ class MainWindow(QMainWindow):
             if de.checkboxBmiUebernehmen.isChecked():
                 self.configIni["Allgemein"]["bmiuebernehmen"] = "1"  
             self.configIni["Allgemein"]["pdfbezeichnung"] = de.lineEditPdfBezeichnung.text()
+            self.configIni["Allgemein"]["benutzeruebernehmen"] = "0"
+            if de.checkboxBenutzerUebernehmen.isChecked():
+                self.configIni["Allgemein"]["benutzeruebernehmen"] = "1"
+            self.configIni["Allgemein"]["einrichtunguebernehmen"] = "0"
+            if de.checkboxEinrichtungUebernehmen.isChecked():
+                self.configIni["Allgemein"]["einrichtunguebernehmen"] = "1"
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
@@ -834,6 +857,7 @@ class MainWindow(QMainWindow):
     def einstellungenBenutzer(self, neustartfrage = False):
         de = dialogEinstellungenBenutzer.EinstellungenBenutzer(self.configPath)
         if de.exec() == 1:
+            self.configIni["Benutzer"]["einrichtung"] = de.lineEditEinrichtungsname.text()
             namen = []
             kuerzel = []
             for i in range(5):
@@ -1026,7 +1050,12 @@ class MainWindow(QMainWindow):
             pdf.cell(0, 10, "von " + self.name + " (* " + self.geburtsdatum + bmiText + ")", align="C", new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("helvetica", "", 10)
             untdat = "{:>02}".format(str(self.untdatEdit.date().day())) + "." + "{:>02}".format(str(self.untdatEdit.date().month())) + "." + str(self.untdatEdit.date().year())
-            pdf.cell(0, 6, "Untersucht am " + untdat, align="C", new_x="LMARGIN", new_y="NEXT")
+            beurteiltVon = ""
+            if self.benutzeruebernehmen:
+                beurteiltVon = " von " + self.benutzernamen[int(self.aktuelleBenuztzernummer)]
+            if self.einrichtunguebernehmen:
+                beurteiltVon += " (" + self.einrichtung + ")"
+            pdf.cell(0, 6, "Beurteilt am " + untdat + beurteiltVon, align="C", new_x="LMARGIN", new_y="NEXT")
             pdf.cell(0, 10, new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("helvetica", "", 14)
             pdf.set_font(style="B")

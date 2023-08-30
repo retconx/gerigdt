@@ -28,6 +28,8 @@ class EinstellungenAllgemein(QDialog):
         self.pdferstellen = configIni["Allgemein"]["pdferstellen"] == "1"
         self.bmiuebernehmen = configIni["Allgemein"]["bmiuebernehmen"] == "1"
         self.pdfbezeichnung = configIni["Allgemein"]["pdfbezeichnung"] 
+        self.benutzerUebernehmen = configIni["Allgemein"]["benutzeruebernehmen"] == "1"
+        self.einrichtungUebernehmen = configIni["Allgemein"]["einrichtunguebernehmen"] == "1"
 
         self.setWindowTitle("Allgemeine Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -63,6 +65,7 @@ class EinstellungenAllgemein(QDialog):
         labelVorherigeDokuLaden.setStyleSheet("font-weight:normal")
         self.checkboxVorherigeDokuLaden = QCheckBox()
         self.checkboxVorherigeDokuLaden.setChecked(self.vorherigeDokuLaden)
+        # Dokumenationsverwaltung daktivieren, falls nicht lizensiert
         if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(lizenzschluessel, configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
             labelKeineRegistrierung.setVisible(True)
             self.checkboxVorherigeDokuLaden.setEnabled(False)
@@ -86,17 +89,30 @@ class EinstellungenAllgemein(QDialog):
         self.checkboxBmiUebernehmen = QCheckBox()
         self.checkboxBmiUebernehmen.setChecked(self.bmiuebernehmen)
         self.checkboxBmiUebernehmen.stateChanged.connect(self.checkboxBmiUebernehmenChanged) # type: ignore
+        labelBenutzerUebernehmen = QLabel("Benutzername übernehmen")
+        labelBenutzerUebernehmen.setStyleSheet("font-weight:normal")
+        labelEinrichtungUebernehmen = QLabel("Einrichtungsname übernehmen")
+        labelEinrichtungUebernehmen.setStyleSheet("font-weight:normal")
+        self.checkboxBenutzerUebernehmen = QCheckBox()
+        self.checkboxBenutzerUebernehmen.setChecked(self.benutzerUebernehmen)
+        self.checkboxBenutzerUebernehmen.stateChanged.connect(self.checkboxBenutzerUebernehmenChanged) # type: ignore
+        self.checkboxEinrichtungUebernehmen = QCheckBox()
+        self.checkboxEinrichtungUebernehmen.setChecked(self.einrichtungUebernehmen)
+        self.checkboxEinrichtungUebernehmen.stateChanged.connect(self.checkboxEinrichtungUebernehmenChanged) # type: ignore
+        labelPdfBezeichnung = QLabel("PDF-Bezeichnung in Karteikarte:")
+        labelPdfBezeichnung.setStyleSheet("font-weight:normal")
+        self.lineEditPdfBezeichnung = QLineEdit(self.pdfbezeichnung)
+        self.lineEditPdfBezeichnung.setStyleSheet("font-weight:normal")
+        self.lineEditPdfBezeichnung.setPlaceholderText("Geriatrisches Basisassessment")
+        # PDF-Erstellung daktivieren, falls nicht lizensiert
         if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(lizenzschluessel, configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
             labelKeineRegistrierung.setVisible(True)
             self.checkboxPdfErstellen.setEnabled(False)
             self.checkboxPdfErstellen.setChecked(False)
             self.checkboxBmiUebernehmen.setEnabled(False)
             self.checkboxBmiUebernehmen.setChecked(False)
-        labelPdfBezeichnung = QLabel("PDF-Bezeichnung in Karteikarte:")
-        labelPdfBezeichnung.setStyleSheet("font-weight:normal")
-        self.lineEditPdfBezeichnung = QLineEdit(self.pdfbezeichnung)
-        self.lineEditPdfBezeichnung.setStyleSheet("font-weight:normal")
-        self.lineEditPdfBezeichnung.setPlaceholderText("Geriatrisches Basisassessment")
+            self.lineEditPdfBezeichnung.setText("")
+            self.checkboxBenutzerUebernehmen.setChecked(False)
 
         groupboxLayoutPdfErstellung = QGridLayout()
         groupboxLayoutPdfErstellung.addWidget(labelKeineRegistrierung, 0, 0, 1, 2)
@@ -104,9 +120,13 @@ class EinstellungenAllgemein(QDialog):
         groupboxLayoutPdfErstellung.addWidget(self.checkboxPdfErstellen, 1, 1)
         groupboxLayoutPdfErstellung.addWidget(labelBmiUebernehmen, 2, 0)
         groupboxLayoutPdfErstellung.addWidget(self.checkboxBmiUebernehmen, 2, 1)
-        groupboxLayoutPdfErstellung.addWidget(labelPdfBezeichnung, 3, 0)
-        groupboxLayoutPdfErstellung.addWidget(self.lineEditPdfBezeichnung, 4, 0)
+        groupboxLayoutPdfErstellung.addWidget(labelBenutzerUebernehmen, 3, 0)
+        groupboxLayoutPdfErstellung.addWidget(self.checkboxBenutzerUebernehmen, 3, 1)
+        groupboxLayoutPdfErstellung.addWidget(labelEinrichtungUebernehmen, 4, 0)
+        groupboxLayoutPdfErstellung.addWidget(self.checkboxEinrichtungUebernehmen, 4, 1)
         groupboxPdfErstellung.setLayout(groupboxLayoutPdfErstellung)
+        groupboxLayoutPdfErstellung.addWidget(labelPdfBezeichnung, 5, 0)
+        groupboxLayoutPdfErstellung.addWidget(self.lineEditPdfBezeichnung, 6, 0)
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
         dialogLayoutV.addWidget(groupboxPdfErstellung)
@@ -130,8 +150,18 @@ class EinstellungenAllgemein(QDialog):
     def checkboxPdfErstellenChanged(self, newState):
         if not newState:
             self.checkboxBmiUebernehmen.setChecked(False)
+            self.lineEditPdfBezeichnung.setText("")
+            self.checkboxBenutzerUebernehmen.setChecked(False)
+            self.checkboxEinrichtungUebernehmen.setChecked(False)
 
     def checkboxBmiUebernehmenChanged(self, newState):
+        if newState:
+            self.checkboxPdfErstellen.setChecked(True)
+
+    def checkboxBenutzerUebernehmenChanged(self, newState):
+        if newState:
+            self.checkboxPdfErstellen.setChecked(True)
+    def checkboxEinrichtungUebernehmenChanged(self, newState):
         if newState:
             self.checkboxPdfErstellen.setChecked(True)
 
