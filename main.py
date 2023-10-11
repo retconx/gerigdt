@@ -1044,9 +1044,11 @@ class MainWindow(QMainWindow):
             logger.logger.info("FPDF-Instanz erzeugt")
             pdf.add_page()
             bmiText = ""
+            logger.logger.info("1")
             if bmi != 0:
                 bmiText = ", BMI: " + bmi + " kg/m\u00b2"
             pdf.set_font("helvetica", "", 14)
+            logger.logger.info("2")
             pdf.cell(0, 10, "von " + self.name + " (* " + self.geburtsdatum + bmiText + ")", align="C", new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("helvetica", "", 10)
             untdat = "{:>02}".format(str(self.untdatEdit.date().day())) + "." + "{:>02}".format(str(self.untdatEdit.date().month())) + "." + str(self.untdatEdit.date().year())

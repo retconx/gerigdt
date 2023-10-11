@@ -40,7 +40,7 @@ class EinstellungenProgrammerweiterungen(QDialog):
         groupboxLanr.setLayout(groupboxLayoutLanr)
         # Groupbox Lizenzschlüssel
         groupboxLayoutLizenzschluessel = QVBoxLayout()
-        groupboxLizenzschluessel = QGroupBox("Lizenzschluessel")
+        groupboxLizenzschluessel = QGroupBox("Lizenzschlüssel")
         groupboxLizenzschluessel.setStyleSheet("font-weight:bold")
         self.lineEditLizenzschluessel = QLineEdit(self.lizenzschluessel)
         self.lineEditLizenzschluessel.setStyleSheet("font-weight:normal")
@@ -64,7 +64,7 @@ class EinstellungenProgrammerweiterungen(QDialog):
             self.lineEditLanr.setFocus()
             self.lineEditLanr.selectAll()
         elif not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT):
-            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR/lizenzschluessel-Kombination ist ungültig.", QMessageBox.StandardButton.Ok)
+            mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR/Lizenzschlüssel-Kombination ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLizenzschluessel.setFocus()
             self.lineEditLizenzschluessel.selectAll()
