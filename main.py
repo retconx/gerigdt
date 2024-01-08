@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
                     self.configIni.write(configfile)
                 self.version = self.configIni["Allgemein"]["version"]
                 logger.logger.info("Version auf " + self.version + " aktualisiert")
-                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "GeriGDT wurde erfolgreich auf Version " + self.version + " aktualisiert.<br />Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen. Unter <a href='http://www.gdttools.de/#spende'>www.gdtools.de</a> finden Sie Informationen über die Möglichkeit einer Spende. Dankeschön! &#x1f609;", QMessageBox.StandardButton.Ok)
+                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "GeriGDT wurde erfolgreich auf Version " + self.version + " aktualisiert.<br />Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen. Unter <a href='https://gdttools.de/gerigdt.php#spende'>gdtools.de</a> finden Sie Informationen über die Möglichkeit einer Spende. Dankeschön! &#x1f609;", QMessageBox.StandardButton.Ok)
                 mb.setTextFormat(Qt.TextFormat.RichText)
                 mb.exec()
         except:
@@ -673,7 +673,7 @@ class MainWindow(QMainWindow):
             sys.exit()
 
     def eventFilter(self, object, event:QEvent):
-        if object == self.widget and event.type() == QEvent.Type.KeyPress and (event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter):
+        if object == self.widget and event.type() == QEvent.Type.KeyPress and (event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter): # type:ignore
             self.pushbuttonDatenSenden.click()
             return True
         return False
@@ -1044,11 +1044,9 @@ class MainWindow(QMainWindow):
             logger.logger.info("FPDF-Instanz erzeugt")
             pdf.add_page()
             bmiText = ""
-            logger.logger.info("1")
             if bmi != 0:
                 bmiText = ", BMI: " + bmi + " kg/m\u00b2"
             pdf.set_font("helvetica", "", 14)
-            logger.logger.info("2")
             pdf.cell(0, 10, "von " + self.name + " (* " + self.geburtsdatum + bmiText + ")", align="C", new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("helvetica", "", 10)
             untdat = "{:>02}".format(str(self.untdatEdit.date().day())) + "." + "{:>02}".format(str(self.untdatEdit.date().month())) + "." + str(self.untdatEdit.date().year())

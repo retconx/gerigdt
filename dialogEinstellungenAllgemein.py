@@ -112,6 +112,7 @@ class EinstellungenAllgemein(QDialog):
             self.checkboxBmiUebernehmen.setEnabled(False)
             self.checkboxBmiUebernehmen.setChecked(False)
             self.lineEditPdfBezeichnung.setText("")
+            self.checkboxBenutzerUebernehmen.setEnabled(False)
             self.checkboxBenutzerUebernehmen.setChecked(False)
 
         groupboxLayoutPdfErstellung = QGridLayout()

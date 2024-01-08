@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 reLanr = "^\\d{9}$"
-reLizenzschluessel = "^([A-Z0-9]{5}-){4}[A-F0-9]{5}$"
+reLizenzschluessel = "^([A-Z0-9]{5}-){4}[A-Z0-9]{5}$"
 
 class EinstellungenProgrammerweiterungen(QDialog):
     def __init__(self, configPath):
@@ -63,7 +63,7 @@ class EinstellungenProgrammerweiterungen(QDialog):
             mb.exec()
             self.lineEditLanr.setFocus()
             self.lineEditLanr.selectAll()
-        elif not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT):
+        elif re.match(reLizenzschluessel, self.lineEditLizenzschluessel.text()) == None or not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT):
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR/Lizenzschlüssel-Kombination ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLizenzschluessel.setFocus()
