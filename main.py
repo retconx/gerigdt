@@ -636,42 +636,44 @@ class MainWindow(QMainWindow):
             anwendungMenu = menubar.addMenu("")
             aboutAction = QAction(self)
             aboutAction.setMenuRole(QAction.MenuRole.AboutRole)
-            aboutAction.triggered.connect(self.ueberGeriGdt) # type: ignore
+            aboutAction.triggered.connect(self.ueberGeriGdt) 
             aboutAction.setShortcut(QKeySequence("Ctrl+Ü"))
             updateAction = QAction("Auf Update prüfen", self)
             updateAction.setMenuRole(QAction.MenuRole.ApplicationSpecificRole)
-            updateAction.triggered.connect(self.updatePruefung) # type: ignore
+            updateAction.triggered.connect(self.updatePruefung) 
             updateAction.setShortcut(QKeySequence("Ctrl+U"))
             einstellungenMenu = menubar.addMenu("Einstellungen")
             einstellungenAllgemeinAction = QAction("Allgemeine Einstellungen", self)
-            einstellungenAllgemeinAction.triggered.connect(lambda neustartfrage: self.einstellungenAllgemein(True)) # type: ignore
+            einstellungenAllgemeinAction.triggered.connect(lambda neustartfrage: self.einstellungenAllgemein(True)) 
             einstellungenAllgemeinAction.setShortcut(QKeySequence("Ctrl+E"))
             einstellungenGdtAction = QAction("GDT-Einstellungen", self)
-            einstellungenGdtAction.triggered.connect(lambda neustartfrage: self.einstellungenGdt(True)) # type: ignore
+            einstellungenGdtAction.triggered.connect(lambda neustartfrage: self.einstellungenGdt(True))
             einstellungenGdtAction.setShortcut(QKeySequence("Ctrl+G"))
             einstellungenBenutzerAction = QAction("BenutzerInnen verwalten", self)
-            einstellungenBenutzerAction.triggered.connect(lambda neustartfrage: self.einstellungenBenutzer(True)) # type: ignore
+            einstellungenBenutzerAction.triggered.connect(lambda neustartfrage: self.einstellungenBenutzer(True)) 
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
-            einstellungenErweiterungenAction.triggered.connect(lambda neustartfrage: self.einstellungenLanrLizenzschluessel(True)) # type: ignore
+            einstellungenErweiterungenAction.triggered.connect(lambda neustartfrage: self.einstellungenLanrLizenzschluessel(True)) 
             einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
             einstellungenImportExportAction = QAction("Im- /Exportieren", self)
-            einstellungenImportExportAction.triggered.connect(self.einstellungenImportExport) # type: ignore
+            einstellungenImportExportAction.triggered.connect(self.einstellungenImportExport) 
             einstellungenImportExportAction.setShortcut(QKeySequence("Ctrl+I"))
             einstellungenImportExportAction.setMenuRole(QAction.MenuRole.NoRole)
             hilfeMenu = menubar.addMenu("Hilfe")
             hilfeWikiAction = QAction("GeriGDT Wiki", self)
-            hilfeWikiAction.triggered.connect(self.gerigdtWiki) # type: ignore
+            hilfeWikiAction.triggered.connect(self.gerigdtWiki) 
             hilfeWikiAction.setShortcut(QKeySequence("Ctrl+W"))
             hilfeUpdateAction = QAction("Auf Update prüfen", self)
-            hilfeUpdateAction.triggered.connect(self.updatePruefung) # type: ignore
+            hilfeUpdateAction.triggered.connect(self.updatePruefung) 
             hilfeUpdateAction.setShortcut(QKeySequence("Ctrl+U"))
             hilfeUeberAction = QAction("Über GeriGDT", self)
             hilfeUeberAction.setMenuRole(QAction.MenuRole.NoRole)
-            hilfeUeberAction.triggered.connect(self.ueberGeriGdt) # type: ignore
+            hilfeUeberAction.triggered.connect(self.ueberGeriGdt) 
             hilfeUeberAction.setShortcut(QKeySequence("Ctrl+Ü"))
+            hilfeEulaAction = QAction("Lizenzvereinbarung (EULA)", self)
+            hilfeEulaAction.triggered.connect(self.eula) 
             hilfeLogExportieren = QAction("Log-Verzeichnis exportieren", self)
-            hilfeLogExportieren.triggered.connect(self.logExportieren) # type: ignore
+            hilfeLogExportieren.triggered.connect(self.logExportieren) 
             hilfeLogExportieren.setShortcut(QKeySequence("Ctrl+D"))
             
             anwendungMenu.addAction(aboutAction)
@@ -686,6 +688,7 @@ class MainWindow(QMainWindow):
             hilfeMenu.addAction(hilfeUpdateAction)
             hilfeMenu.addSeparator()
             hilfeMenu.addAction(hilfeUeberAction)
+            hilfeMenu.addAction(hilfeEulaAction)
             hilfeMenu.addSeparator()
             hilfeMenu.addAction(hilfeLogExportieren)
             
@@ -815,6 +818,9 @@ class MainWindow(QMainWindow):
     def ueberGeriGdt(self):
         de = dialogUeberGeriGdt.UeberGeriGdt()
         de.exec()
+
+    def eula(self):
+        QDesktopServices.openUrl("https://gdttools.de/Lizenzvereinbarung_GeriGDT.pdf")
 
     def logExportieren(self):
         if (os.path.exists(os.path.join(basedir, "log"))):
