@@ -1,0 +1,76 @@
+<div style="text-align:center">
+    <b>Endnutzer-Lizenzvereinbarung für GeriGDT</b>
+    <br />(Vertrag für Softwarenutzung)
+</div>
+
+<div style="text-align:left;margin-top:20px">
+<b>Definitionen:</b>
+<ul>
+    <li>"Lizenzgeber": Fabian Treusch, Nelkenstr. 17, 75394 Oberreichenbach</li>
+    <li>"Lizenznehmer": die juristische oder natürliche Person, der das Recht zur Nutzung dieser Software eingeräumt wird</li>
+</ul>
+<b>§ 1 Vertragsgegenstand</b>
+<br />(1) Gegenstand dieses Vertrags ist die Release-Version der Software GeriGDT. Die Software dient
+der Dokumentation des geriatrischen Basisassessments in einem handelsüblichen
+Arztpraxisverwaltungssystem. Zielgruppe sind niedergelassene Ärzte und Ärztinnen.
+<br />(2) Der Quellcode der Software ist auf GitHub veröffentlicht und ist nicht Gegenstand dieses Vertrags.
+
+<br /><br /><b>§ 2 Urheberrechtsschutz</b>
+<br />(1) Der Lizenznehmer erkennt an, dass es sich bei der Software um ein schutzfähiges Computerprogramm im Sinne von § 2 Abs. 1 Nr. 1, § 69 a UrhG handelt und dass der Lizenzgeber Urheber im Sinne der §§ 7, 69 b UrhG ist.
+<br />(2) Dem Lizenznehmer ist es nicht gestattet, Urheberrechtsvermerke des Lizenzgebers zu verändern oder zu entfernen.
+
+<br /><br /><b>§ 3 Lizenzumfang</b>
+<br />(1) Mit der Softwarelizenz überträgt der Lizenzgeber dem Lizenznehmer ein nicht exklusives,
+zeitlich unbefristetes urheberrechtliches Nutzungsrecht an der Software in Übereinstimmung mit
+den Vorgaben des deutschen Urheberrechtsgesetzes.
+<br />(2) Für die richtige Anwendung der Software ist der Lizenznehmer selbst verantwortlich. Die richtige Anwendung ist in der zugehörigen Dokumentation (Wiki auf GitHub) beschrieben.
+<br />(3) Ein zeitlich unbefristeter Anspruch auf Updates der Software gehören zum Lizenzumfang. Die Updates können als Release-Versionen von GitHub heruntergeladen werden. Für Updates mit größeren Funktionserweiterungen behält sich der Lizenzgeber vor, eine zusätzliche Lizenzgebühr in Rechnung zu stellen.
+<br />(4) Der Lizenznehmer ist berechtigt, die Software für den eigenen Gebrauch zu vervielfältigen um sie an beliebig vielen PC-Arbeitsplätzen innerhalb seiner Arztpraxis zu nutzen.
+
+<br /><br /><b>§ 4 Besondere Beschränkungen</b>
+<br />(1) Dem Lizenznehmer ist untersagt, ohne vorherige schriftliche Einwilligung des Lizenzgebers die Software abzuändern, zu übersetzen oder von der Software abgeleitete Werke zu erstellen.
+<br />(2) Der Lizenznehmer ist nicht berechtigt, die Release-Versionen der Software zurückzuentwickeln (reverse engeneering),  zu dekompilieren, zu disassemblieren oder auf andere Weise zu versuchen, den Quellcode zugänglich zu machen.
+
+<br /><br /><b>§ 5 Inhaberschaft an Rechten</b>
+<br />(1) Der Lizenznehmer erhält das in diesem Lizenzvertrag vereinbarte Nutzungsrecht. Ein Erwerb von weiteren Rechten an der Software ist ausgeschlossen.
+<br />(2) Der Lizenzgeber behält sich insbesondere alle Veröffentlichungs-, Vervielfältigungs-, Bearbeitungs- und. Verwertungsrechte an der Software vor.
+
+<br /><br /><b>§ 6 Übertragung des Benutzerrechts</b>
+<br />(1) Das Recht zur Benutzung der Software kann nur mit vorheriger schriftlicher Einwilligung des Lizenzgebers und nur unter den Bedingungen dieses Vertrages an einen Dritten übertragen werden.
+<br />(2) Verschenken, Vermieten, Verleasen und Verleih der Software sind ausdrücklich untersagt.
+
+<br /><br /><b>§ 7 Dauer des Vertrages</b>
+<br />(1) Der Vertrag läuft auf unbeschränkte Zeit.
+<br />(2) Das Recht des Lizenznehmers zur Benutzung der Software erlischt jedoch auch ohne Kündigung, wenn der Lizenznehmer eine Bedingung dieses Vertrages verletzt.
+<br />(3) Bei Beendigung des Nutzungsrechts ist der Lizenznehmer verpflichtet, alle Kopien der Software einschließlich der Lizenzschlüssel zu vernichten und auf Verlangen des Lizenzgebers die vollständige Vernichtung durch notarielle eidesstattliche Erklärung zu versichern.
+
+<br /><br /><b>§ 8 Kaufpreis, Zustandekommen des Vertrags</b>
+<br />(1) GeriGDT wird kostenlos zur Verfügung gestellt.
+<br />(2) Der Vertrag kommt zustande, sobald der Lizenznehmer diesem zugestimmt hat.
+<br />(3) Der Lizenznehmer ist zu einer Nutzung der Software, die über die in diesem Vertrag eingeräumten Nutzungsrechte hinausgeht, nur nach vorheriger schriftlicher Zustimmung des Lizenzgebers berechtigt. Bei Mehrnutzung ohne entsprechende Zustimmung ist der Lizenzgeber berechtigt, den für die weitergehende Nutzung anfallenden Betrag gemäß der zu diesem Zeitpunkt gültigen Lizenzpreis in Rechnung zu stellen. Weitergehende Schadensersatzansprüche bleiben hierdurch unberührt.
+
+<br /><br /><b>§ 9 Technische Schutzmaßnahmen</b>
+<br />(1) Für die vollumfängliche Nutzung der Release-Versionen der Software ist eine Aktivierung mittels eines Lizenzschlüssels erforderlich.
+<br />(2) Der unbefristet gültige Lizenzschlüssel wird dem Lizenznehmer nach Kaufabschluss zur Verfügung gestellt.
+<br />(3) Für die Berechnung sowohl des befristet als auch des unbefristet gültigen Lizenzschlüssels wird eine gültige lebenslange Arztnummer (LANR) benötigt, die daher vom Lizenznehmer angegeben werden muss.
+<br />(4) Der Lizenznehmer ist nicht berechtigt, die Schutzmaßnahmen zu entfernen oder zu umgehen.
+
+<br /><br /><b>§ 10 Weiterveräußerung</b>
+<br />(1) Eine (Weiter-)veräußerung der Software durch den Lizenznehmer ist nicht gestattet.
+
+<br /><br /><b>§ 11 Support</b>
+<br />(1) Die Installation der Software erfolgt in eigener Verantwortung durch den Lizenznehmer.
+<br />(2) Der Lizenzgeber gewährt dem Lizenznehmer unbefristet die Möglichkeit einer Supportanfrage per E-Mail.
+
+<br /><br /><b>§ 12 Änderungen und Aktualisierungen</b>
+<br />(1) Der Lizenzgeber ist berechtigt, Aktualisierungen der Software nach eigenem Ermessen zu erstellen. Der Lizenznehmer hat kein Recht auf die Durchführung einer Änderung oder Aktualisierung.
+
+<br /><br /><b>§ 13 Haftung</b>
+<br />(1) Der Lizenzgeber übernimmt keine Haftung für die Fehlerfreiheit der Software.
+<br />(2) Der Lizenzgeber übernimmt keine Gewährleistung dafür, dass die Software den Anforderungen und Zwecken des Lizenznehmers genügt oder mit anderen von dem Lizenznehmer ausgewählten Programmen zusammenarbeitet.
+<br />(3) Die Verantwortung für die richtige Auswahl und die Folgen der Benutzung der Software einschließlich der zugehörigen Dokumentation sowie der damit beabsichtigten oder erzielten Ergebnisse trägt der Lizenznehmer.
+<br />(4) Der Lizenzgeber haftet nicht für Schäden, die aufgrund der Benutzung dieser Software oder der Unfähigkeit, diese Software zu verwenden, entstehen. Uneingeschränkt eingeschlossen sind Schäden aus entgangenem Gewinn, Betriebsunterbrechung, Verlust von geschäftlichen Informationen oder Daten oder aus anderem finanziellen Verlust, auch wenn der Lizenzgeber von der Möglichkeit eines solchen Schadens unterrichtet worden ist. Dies gilt nicht, sowie wegen Vorsatzes oder grober Fahrlässigkeit zwingend gehaftet wird.
+
+<br /><br /><b>§ 14 Schlussbestimmungen</b>
+<br />(1) Sind einzelne Bestimmungen dieses Lizenzvertrags ungültig, so bleiben die übrigen Bestimmungen wirksam. Anstelle der ungültigen Bestimmung gilt eine ihrem wirtschaftlichen Zweck möglichst nahe kommende, wirksame Bestimmung als vereinbart.
+</div>

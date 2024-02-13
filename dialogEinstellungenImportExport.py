@@ -34,9 +34,6 @@ class EinstellungenImportExport(QDialog):
             lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(lizenzschluessel)
 
         mainLayoutV = QVBoxLayout()
-
-        labelKeineRegistrierung = QLabel("Für diese Funktion ist eine gültige LANR/Lizenzschlüsselkombination erforderlich.")
-        labelKeineRegistrierung.setStyleSheet("font-weight:normal;color:rgb(0,0,200)")
         
         # Groupbox Import/Export
         groupboxImportExport = QGroupBox("Import/Export")
@@ -70,12 +67,6 @@ class EinstellungenImportExport(QDialog):
         for cb in self.checkboxEinstellungen:
             groupboxEinstellungenLayout.addWidget(cb)
         self.groupboxEinstellungen.setLayout(groupboxEinstellungenLayout)
-
-        if not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(lizenzschluessel, self.configIni["Erweiterungen"]["lanr"], gdttoolsL.SoftwareId.GERIGDT):
-            mainLayoutV.addWidget(labelKeineRegistrierung)
-            groupboxImportExport.setEnabled(False)
-            self.groupboxEinstellungen.setChecked(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
         
         mainLayoutV.addWidget(groupboxImportExport)
         mainLayoutV.addWidget(self.groupboxEinstellungen)

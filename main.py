@@ -1,6 +1,6 @@
 import sys, configparser, os, datetime, shutil,logger
 import gdt, gdtzeile, gdttoolsL
-import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport
+import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport, dialogEula
 import geriasspdf
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QEvent
 from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices, QKeyEvent
@@ -175,6 +175,10 @@ class MainWindow(QMainWindow):
         self.vorherigeDokuLaden = (self.configIni["Allgemein"]["vorherigedokuladen"] == "1")
 
         # Nachträglich hinzufefügte Options
+        # 3.10.2
+        self.eulagelesen = False
+        if self.configIni.has_option("Allgemein", "eulagelesen"):
+            self.eulagelesen = self.configIni["Allgemein"]["eulagelesen"] == "True"
         # 3.10.0
         self.benutzeruebernehmen = False
         if self.configIni.has_option("Allgemein", "benutzeruebernehmen"):
@@ -215,6 +219,21 @@ class MainWindow(QMainWindow):
                     self.configIni.write(configfile)
         else:
             self.lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(self.lizenzschluessel)
+
+        # Prüfen, ob EULA gelesen
+        if not self.eulagelesen:
+            de = dialogEula.Eula()
+            de.exec()
+            if de.checkBoxZustimmung.isChecked():
+                self.eulagelesen = True
+                self.configIni["Allgemein"]["eulagelesen"] = "True"
+                with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                    self.configIni.write(configfile)
+                logger.logger.info("EULA zugestimmt")
+            else:
+                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Ohne Zustimmung der Lizenzvereinbarung kann GeriGDT nicht gestartet werden.", QMessageBox.StandardButton.Ok)
+                mb.exec()
+                sys.exit()
 
         # Grundeinstellungen bei erstem Start
         if ersterStart:
@@ -257,9 +276,22 @@ class MainWindow(QMainWindow):
                     self.configIni.write(configfile)
                 self.version = self.configIni["Allgemein"]["version"]
                 logger.logger.info("Version auf " + self.version + " aktualisiert")
-                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "GeriGDT wurde erfolgreich auf Version " + self.version + " aktualisiert.<br />Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen. Unter <a href='https://gdttools.de/gerigdt.php#spende'>gdtools.de</a> finden Sie Informationen über die Möglichkeit einer Spende. Dankeschön! &#x1f609;", QMessageBox.StandardButton.Ok)
-                mb.setTextFormat(Qt.TextFormat.RichText)
-                mb.exec()
+                # Prüfen, ob EULA gelesen
+                de = dialogEula.Eula(self.version)
+                de.exec()
+                self.eulagelesen = de.checkBoxZustimmung.isChecked()
+                self.configIni["Allgemein"]["eulagelesen"] = str(self.eulagelesen)
+                with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                    self.configIni.write(configfile)
+                if self.eulagelesen:
+                    logger.logger.info("EULA zugestimmt")
+                else:
+                    logger.logger.info("EULA nicht zugestimmt")
+                    mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Ohne  Zustimmung zur Lizenzvereinbarung kann GeriGDT nicht gestartet werden.", QMessageBox.StandardButton.Ok)
+                    mb.exec()
+                    sys.exit()
+        except SystemExit:
+            sys.exit()
         except:
             logger.logger.error("Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"])
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"], QMessageBox.StandardButton.Ok)
