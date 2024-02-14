@@ -21,7 +21,7 @@ class Eula(QDialog):
         self.buttonBox.accepted.connect(self.accept)
 
         dialogLayoutV = QVBoxLayout()
-        labelAktualisiert = QLabel("SignoGDT wurde erfolgreich auf Version " + neueVersion + " aktualisiert.")
+        labelAktualisiert = QLabel("GeriGDT wurde erfolgreich auf Version " + neueVersion + " aktualisiert.")
         labelAktualisiert.setStyleSheet("font-weight:bold")
         labelSpende = QLabel("Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen.<br />Unter <a href='https://gdttools.de/gerigdt.php#spende'>gdtools.de</a> finden Sie Informationen über die Möglichkeit einer Spende. Dankeschön! &#x1f609;")
         labelSpende.setTextFormat(Qt.TextFormat.RichText)

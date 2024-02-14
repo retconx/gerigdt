@@ -44,7 +44,7 @@ den Vorgaben des deutschen Urheberrechtsgesetzes.
 <br />(2) Das Recht des Lizenznehmers zur Benutzung der Software erlischt jedoch auch ohne Kündigung, wenn der Lizenznehmer eine Bedingung dieses Vertrages verletzt.
 <br />(3) Bei Beendigung des Nutzungsrechts ist der Lizenznehmer verpflichtet, alle Kopien der Software einschließlich der Lizenzschlüssel zu vernichten und auf Verlangen des Lizenzgebers die vollständige Vernichtung durch notarielle eidesstattliche Erklärung zu versichern.
 
-<br /><br /><b>§ 8 Kaufpreis, Zustandekommen des Vertrags</b>
+<br /><br /><b>§ 8 Kosten, Zustandekommen des Vertrags</b>
 <br />(1) GeriGDT wird kostenlos zur Verfügung gestellt.
 <br />(2) Der Vertrag kommt zustande, sobald der Lizenznehmer diesem zugestimmt hat.
 <br />(3) Der Lizenznehmer ist zu einer Nutzung der Software, die über die in diesem Vertrag eingeräumten Nutzungsrechte hinausgeht, nur nach vorheriger schriftlicher Zustimmung des Lizenzgebers berechtigt. Bei Mehrnutzung ohne entsprechende Zustimmung ist der Lizenzgeber berechtigt, den für die weitergehende Nutzung anfallenden Betrag gemäß der zu diesem Zeitpunkt gültigen Lizenzpreis in Rechnung zu stellen. Weitergehende Schadensersatzansprüche bleiben hierdurch unberührt.
