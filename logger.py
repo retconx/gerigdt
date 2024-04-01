@@ -7,9 +7,9 @@ else:
     logListe = os.listdir(os.path.join(basedir, "log"))
     logListe.sort()
     if len(logListe) > 5:
-        os.remove(os.path.join(basedir, "log/" + logListe[0]))
+        os.remove(os.path.join(basedir, "log", logListe[0]))
 datum = datetime.datetime.strftime(datetime.datetime.today(), "%Y%m%d")
-logHandler = logging.FileHandler(os.path.join(basedir, "log/" + datum + "_optigdt.log"), mode="a", encoding="utf_8")
+logHandler = logging.FileHandler(os.path.join(basedir, "log", datum + "gerigdt.log"), mode="a", encoding="utf_8")
 logLevel = logging.WARNING
 logForm = logging.Formatter("{asctime} {levelname:8}: {message}", "%d.%m.%Y %H:%M:%S", "{")
 if len(sys.argv) == 2 and sys.argv[1].upper() == "DEBUG":
