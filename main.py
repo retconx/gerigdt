@@ -1,4 +1,4 @@
-import sys, configparser, os, datetime, shutil,logger
+import sys, configparser, os, datetime, shutil, logger, subprocess, atexit
 import gdt, gdtzeile, gdttoolsL
 import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport, dialogEula
 import geriasspdf
@@ -35,16 +35,6 @@ else:
     if len(logListe) > 5:
         os.remove(os.path.join(basedir, "log/" + logListe[0]))
 datum = datetime.datetime.strftime(datetime.datetime.today(), "%Y%m%d")
-# logHandler = logging.FileHandler(os.path.join(basedir, "log/" + datum + "_gerigdt.log"), mode="a", encoding="utf_8")
-
-# logLevel = logging.WARNING
-# logForm = logging.Formatter("{asctime} {levelname:8}: {message}", "%d.%m.%Y %H:%M:%S", "{")
-# if len(sys.argv) == 2 and sys.argv[1].upper() == "DEBUG":
-#     logLevel = logging.DEBUG
-# logHandler.setFormatter(logForm)
-# logger = logging.getLogger(__name__)
-# logger.addHandler(logHandler)
-# logger.setLevel(logLevel)
 
 def versionVeraltet(versionAktuell:str, versionVergleich:str):
     """
@@ -200,6 +190,13 @@ class MainWindow(QMainWindow):
         self.bmiuebernehmen = False
         if self.configIni.has_option("Allgemein", "bmiuebernehmen"):
             self.bmiuebernehmen = (self.configIni["Allgemein"]["bmiuebernehmen"] == "1")
+        # 3.11.0
+        self.autoupdate = True
+        self.updaterpfad = ""
+        if self.configIni.has_option("Allgemein", "autoupdate"):
+            self.autoupdate = self.configIni["Allgemein"]["autoupdate"] == "True"
+        if self.configIni.has_option("Allgemein", "updaterpfad"):
+            self.updaterpfad = self.configIni["Allgemein"]["updaterpfad"]
         # /Nachträglich hinzufefügte Options
 
         z = self.configIni["GDT"]["zeichensatz"]
@@ -273,6 +270,11 @@ class MainWindow(QMainWindow):
                     self.configIni["Allgemein"]["pdferstellen"] = "0"
                 if not self.configIni.has_option("Allgemein", "bmiuebernehmen"):
                     self.configIni["Allgemein"]["bmiuebernehmen"] = "0"
+                # 3.10.5 -> 3.11.0 ["Allgemein"]["autoupdate"] und ["Allgemein"]["updaterpfad"] hinzufügen
+                if not self.configIni.has_option("Allgemein", "autoupdate"):
+                    self.configIni["Allgemein"]["autoupdate"] = "True"
+                if not self.configIni.has_option("Allgemein", "updaterpfad"):
+                    self.configIni["Allgemein"]["updaterpfad"] = ""
                 # /config.ini aktualisieren
 
                 with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
@@ -669,6 +671,10 @@ class MainWindow(QMainWindow):
             hilfeUpdateAction = QAction("Auf Update prüfen", self)
             hilfeUpdateAction.triggered.connect(self.updatePruefung) 
             hilfeUpdateAction.setShortcut(QKeySequence("Ctrl+U"))
+            hilfeAutoUpdateAction = QAction("Automatisch auf Update prüfen", self)
+            hilfeAutoUpdateAction.setCheckable(True)
+            hilfeAutoUpdateAction.setChecked(self.autoupdate)
+            hilfeAutoUpdateAction.triggered.connect(self.autoUpdatePruefung)
             hilfeUeberAction = QAction("Über GeriGDT", self)
             hilfeUeberAction.setMenuRole(QAction.MenuRole.NoRole)
             hilfeUeberAction.triggered.connect(self.ueberGeriGdt) 
@@ -689,6 +695,7 @@ class MainWindow(QMainWindow):
             hilfeMenu.addAction(hilfeWikiAction)
             hilfeMenu.addSeparator()
             hilfeMenu.addAction(hilfeUpdateAction)
+            hilfeMenu.addAction(hilfeAutoUpdateAction)
             hilfeMenu.addSeparator()
             hilfeMenu.addAction(hilfeUeberAction)
             hilfeMenu.addAction(hilfeEulaAction)
@@ -696,12 +703,13 @@ class MainWindow(QMainWindow):
             hilfeMenu.addAction(hilfeLogExportieren)
             
             # Updateprüfung auf Github
-            try:
-                self.updatePruefung(meldungNurWennUpdateVerfuegbar=True)
-            except Exception as e:
-                mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Updateprüfung nicht möglich.\nBitte überprüfen Sie Ihre Internetverbindung.", QMessageBox.StandardButton.Ok)
-                mb.exec()
-                logger.logger.warning("Updateprüfung nicht möglich: " + str(e))
+            if self.autoupdate:
+                try:
+                    self.updatePruefung(meldungNurWennUpdateVerfuegbar=True)
+                except Exception as e:
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Updateprüfung nicht möglich.\nBitte überprüfen Sie Ihre Internetverbindung.", QMessageBox.StandardButton.Ok)
+                    mb.exec()
+                    logger.logger.warning("Updateprüfung nicht möglich: " + str(e))
             
             # Gegebenenfalls vorheriges Untersuchungsergebnis verwenden
             if self.vorherigeDokuLaden:
@@ -806,17 +814,70 @@ class MainWindow(QMainWindow):
     def benutzerGewechselt(self):
         self.aktuelleBenuztzernummer = self.dokuvonComboBox.currentIndex()
 
+    # def updatePruefung(self, meldungNurWennUpdateVerfuegbar = False):
+    #     response = requests.get("https://api.github.com/repos/retconx/gerigdt/releases/latest")
+    #     githubRelaseTag = response.json()["tag_name"]
+    #     latestVersion = githubRelaseTag[1:] # ohne v
+    #     if versionVeraltet(self.version, latestVersion):
+    #         mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die aktuellere GeriGDT-Version " + latestVersion + " ist auf <a href='https://github.com/retconx/gerigdt/releases'>Github</a> verfügbar.", QMessageBox.StandardButton.Ok)
+    #         mb.setTextFormat(Qt.TextFormat.RichText)
+    #         mb.exec()
+    #     elif not meldungNurWennUpdateVerfuegbar:
+    #         mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Sie nutzen die aktuelle GeriGDT-Version.", QMessageBox.StandardButton.Ok)
+    #         mb.exec()
+
     def updatePruefung(self, meldungNurWennUpdateVerfuegbar = False):
+        logger.logger.info("Updateprüfung")
         response = requests.get("https://api.github.com/repos/retconx/gerigdt/releases/latest")
         githubRelaseTag = response.json()["tag_name"]
         latestVersion = githubRelaseTag[1:] # ohne v
         if versionVeraltet(self.version, latestVersion):
-            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die aktuellere GeriGDT-Version " + latestVersion + " ist auf <a href='https://www.github.com/retconx/gerigdt/releases'>Github</a> verfügbar.", QMessageBox.StandardButton.Ok)
-            mb.setTextFormat(Qt.TextFormat.RichText)
-            mb.exec()
+            logger.logger.info("Bisher: " + self.version + ", neu: " + latestVersion)
+            if os.path.exists(self.updaterpfad):
+                mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Die aktuellere GeriGDT-Version " + latestVersion + " ist auf Github verfügbar.\nSoll der GDT-Tools Updater geladen werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                mb.setDefaultButton(QMessageBox.StandardButton.Yes)
+                mb.button(QMessageBox.StandardButton.Yes).setText("Ja")
+                mb.button(QMessageBox.StandardButton.No).setText("Nein")
+                if mb.exec() == QMessageBox.StandardButton.Yes:
+                    logger.logger.info("Updater wird geladen")
+                    atexit.register(self.updaterLaden)
+                    sys.exit()
+            else:
+                mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Die aktuellere GeriGDT-Version " + latestVersion + " ist auf <a href='https://github.com/retconx/gerigdt/releases'>Github</a> verfügbar.<br />Bitte beachten Sie auch die Möglichkeit, den Updateprozess mit dem <a href='https://github.com/retconx/gdttoolsupdater/wiki'>GDT-Tools Updater</a> zu automatisieren.", QMessageBox.StandardButton.Ok)
+                mb.setTextFormat(Qt.TextFormat.RichText)
+                mb.exec()
         elif not meldungNurWennUpdateVerfuegbar:
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Sie nutzen die aktuelle GeriGDT-Version.", QMessageBox.StandardButton.Ok)
             mb.exec()
+
+    def updaterLaden(self):
+        sex = sys.executable
+        programmverzeichnis = ""
+        logger.logger.info("sys.executable: " + sex)
+        if "win32" in sys.platform:
+            programmverzeichnis = sex[:sex.rfind("gerigdt.exe")]
+        elif "darwin" in sys.platform:
+            programmverzeichnis = sex[:sex.find("GeriGDT.app")]
+        elif "win32" in sys.platform:
+            programmverzeichnis = sex[:sex.rfind("gerigdt")]
+        logger.logger.info("Programmverzeichnis: " + programmverzeichnis)
+        try:
+            if "win32" in sys.platform:
+                subprocess.Popen([self.updaterpfad, "gerigdt", self.version, programmverzeichnis], creationflags=subprocess.DETACHED_PROCESS) # type: ignore
+            elif "darwin" in sys.platform:
+                subprocess.Popen(["open", "-a", self.updaterpfad, "--args", "gerigdt", self.version, programmverzeichnis])
+            elif "linux" in sys.platform:
+                subprocess.Popen([self.updaterpfad, "gerigdt", self.version, programmverzeichnis])
+        except Exception as e:
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Der GDT-Tools Updater konnte nicht gestartet werden", QMessageBox.StandardButton.Ok)
+            logger.logger.error("Fehler beim Starten des GDT-Tools Updaters: " + str(e))
+            mb.exec()
+
+    def autoUpdatePruefung(self, checked):
+        self.autoupdate = checked
+        self.configIni["Allgemein"]["autoupdate"] = str(checked)
+        with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+            self.configIni.write(configfile)
 
     def ueberGeriGdt(self):
         de = dialogUeberGeriGdt.UeberGeriGdt()
@@ -865,6 +926,8 @@ class MainWindow(QMainWindow):
             self.configIni["Allgemein"]["einrichtunguebernehmen"] = "0"
             if de.checkboxEinrichtungUebernehmen.isChecked():
                 self.configIni["Allgemein"]["einrichtunguebernehmen"] = "1"
+            self.configIni["Allgemein"]["updaterpfad"] = de.lineEditUpdaterPfad.text()
+            self.configIni["Allgemein"]["autoupdate"] = str(de.checkBoxAutoUpdate.isChecked())
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
@@ -938,7 +1001,7 @@ class MainWindow(QMainWindow):
             pass
     
     def gerigdtWiki(self, link):
-        QDesktopServices.openUrl("https://www.github.com/retconx/gerigdt/wiki")
+        QDesktopServices.openUrl("https://github.com/retconx/gerigdt/wiki")
 
     def barthelBerechnen(self):
         """
