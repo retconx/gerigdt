@@ -178,7 +178,8 @@ class EinstellungenAllgemein(QDialog):
         fd.setLabelText(QFileDialog.DialogLabel.Reject, "Abbrechen")
         if fd.exec() == 1:
             self.dokuverzeichnis = fd.directory()
-            self.lineEditArchivierungsverzeichnis.setText(fd.directory().path())
+            self.lineEditArchivierungsverzeichnis.setText(os.path.abspath(fd.directory().path()))
+            self.lineEditArchivierungsverzeichnis.setToolTip(os.path.abspath(fd.directory().path()))
 
     def checkboxPdfErstellenChanged(self, newState):
         if not newState:
@@ -212,8 +213,8 @@ class EinstellungenAllgemein(QDialog):
         fd.setLabelText(QFileDialog.DialogLabel.Accept, "Auswählen")
         fd.setLabelText(QFileDialog.DialogLabel.Reject, "Abbrechen")
         if fd.exec() == 1:
-            self.lineEditUpdaterPfad.setText(fd.selectedFiles()[0])
-            self.lineEditUpdaterPfad.setToolTip(fd.selectedFiles()[0])
+            self.lineEditUpdaterPfad.setText(os.path.abspath(fd.selectedFiles()[0]))
+            self.lineEditUpdaterPfad.setToolTip(os.path.abspath(fd.selectedFiles()[0]))
             self.lineEditUpdaterPfad.setStyleSheet("background:rgb(255,255,255)")
 
     def accept(self):

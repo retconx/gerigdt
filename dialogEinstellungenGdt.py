@@ -155,7 +155,8 @@ class EinstellungenGdt(QDialog):
         fd.setLabelText(QFileDialog.DialogLabel.Reject, "Abbrechen")
         if fd.exec() == 1:
             self.gdtImportVerzeichnis = fd.directory()
-            self.lineEditImport.setText(fd.directory().path())
+            self.lineEditImport.setText(os.path.abspath(fd.directory().path()))
+            self.lineEditImport.setToolTip(os.path.abspath(fd.directory().path()))
 
     def durchsuchenExport(self):
         fd = QFileDialog(self)
@@ -167,7 +168,8 @@ class EinstellungenGdt(QDialog):
         fd.setLabelText(QFileDialog.DialogLabel.Reject, "Abbrechen")
         if fd.exec() == 1:
             self.gdtExportVerzeichnis = fd.directory()
-            self.lineEditExport.setText(fd.directory().path())
+            self.lineEditExport.setText(os.path.abspath(fd.directory().path()))
+            self.lineEditExport.setToolTip(os.path.abspath(fd.directory().path()))
 
     def zeichensatzGewechselt(self):
         self.aktuelleZeichensatznummer = self.combobxZeichensatz.currentIndex()
