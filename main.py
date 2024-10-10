@@ -731,6 +731,14 @@ class MainWindow(QMainWindow):
             if os.path.exists(pfad) and len(os.listdir(pfad)) > 0:
                 dokus = [d for d in os.listdir(pfad) if os.path.isfile(pfad + "/" + d)]
                 dokus.sort()
+                # Ältere Dokus löschen
+                if len(dokus) > 3:
+                    for i in range(0, len(dokus) - 3):
+                        try:
+                            os.unlink(os.path.join(pfad, dokus[i]))
+                            logger.logger.info("Dokufile " + os.path.join(pfad, dokus[i]) + " gelöscht")
+                        except Exception as e:
+                            logger.logger.warning("Fehler beim Löschen von Dokufile " + os.path.join(pfad, dokus[i]) + ": " + str(e))
                 try:
                     with open(pfad + "/" + dokus[len(dokus) - 1], "r") as d:
                         doku = d.read().strip()
