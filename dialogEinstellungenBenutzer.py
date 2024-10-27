@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 class EinstellungenBenutzer(QDialog):
     def __init__(self, configPath):
         super().__init__()
+        self.maxBenutzerzahl = 20
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
@@ -43,11 +44,11 @@ class EinstellungenBenutzer(QDialog):
         dialogLayoutG.addWidget(self.labelKuerzel, 0, 1)
         self.lineEditNamen = []
         self.lineEditKuerzel = []
-        for i in range(5):
+        for i in range(self.maxBenutzerzahl):
             self.lineEditNamen.append(QLineEdit())
             dialogLayoutG.addWidget(self.lineEditNamen[i], i + 1, 0)
         self.lineEditNamen[0].setPlaceholderText("Dr. med. XY")
-        for i in range(5):
+        for i in range(self.maxBenutzerzahl):
             self.lineEditKuerzel.append(QLineEdit())
             self.lineEditKuerzel[i].setFixedWidth(40)
             dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 1)
@@ -64,7 +65,7 @@ class EinstellungenBenutzer(QDialog):
    
     def accept(self):
         fehlendesKuerzel = -1
-        for i in range(5):
+        for i in range(self.maxBenutzerzahl):
             if self.lineEditNamen[i].text() != "" and self.lineEditKuerzel[i].text() == "":
                 fehlendesKuerzel = i
                 break
