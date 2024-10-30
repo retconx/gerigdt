@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
     barthelBettRollstuhltransfer = ["Abhängig von fremder Hilfe, fehlende Sitzbalance (0)", "Erhebliche physische Hilfe beim Transfer erforderlich, Sitzen selbstständig (5)", "Geringe physische bzw. verbale Hilfe oder Beaufsichtigung erforderlich (10)", "Selbstständig, benötigt keine Hilfe (15)"]
     barthelMobilitaet = ["Immobil bzw. Strecke < 50 m (0)", "Unabhängig mit Rollstuhl inklusive Ecken, Strecke > 50 m (5)", "Unterstütztes Gehen möglich, Strecke > 50 m (10)", "Selbstständiges Gehen möglich (Hilfsmittel erlaubt), Strecke > 50 m (15)"]
     barthelTreppensteigen = ["Unfähig, allein Treppe zu steigen (0)", "Benötigt Hilfe oder Überwachung beim Treppensteigen (5)", "Selbstständiges Treppensteigen möglich (10)"]
-    timedUpGo = ["< 10 Sekunden - keine Mobilitätseinschränkung", "11-19 Sekunden - leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - starke Mobilitätseinschränkung"]
+    timedUpGo = ["< 10 Sekunden - keine Mobilitätseinschränkung", "11-19 Sekunden - leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - starke Mobilitätseinschränkung", "Test nicht möglich"]
     kognitiveFunktion = ["Keine oder leichte Einschränkung", "Mittlere Einschränkung", "Schwere Einschränkung"]
     pflegegrad = ["1", "2", "3", "4", "5", "Nicht vorhanden/unbekannt", "Beantragt"]
     verfuegungen = ["Patientenverfügung", "Vorsorgevollmacht", "Betreuungsverfügung"]
