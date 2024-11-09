@@ -1,5 +1,5 @@
 import configparser, os, gdttoolsL, re, sys
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, Qt, QDesktopServices
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -37,6 +37,7 @@ class EinstellungenAllgemein(QDialog):
         self.einrichtungUebernehmen = configIni["Allgemein"]["einrichtunguebernehmen"] == "1"
         self.autoupdate = configIni["Allgemein"]["autoupdate"] == "True"
         self.updaterpfad = configIni["Allgemein"]["updaterpfad"]
+        self.trendverzeichnis = configIni["Allgemein"]["trendverzeichnis"]
 
         self.setWindowTitle("Allgemeine Einstellungen")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -136,6 +137,27 @@ class EinstellungenAllgemein(QDialog):
         groupboxLayoutPdfErstellung.addWidget(labelPdfBezeichnung, 5, 0)
         groupboxLayoutPdfErstellung.addWidget(self.lineEditPdfBezeichnung, 6, 0)
 
+        # GroupBox Trenderstellung
+        groupboxTrenderstellungLayoutG = QGridLayout()
+        groupboxTrenderstellung = QGroupBox("Trenderstellung\u002a")
+        groupboxTrenderstellung.setFont(self.fontBold)
+        labelTrendverzeichnis = QLabel("Trendverzeichnis")
+        labelTrendverzeichnis.setFont(self.fontNormal)
+        self.lineEditTrendverzeichnis = QLineEdit(self.trendverzeichnis)
+        self.lineEditTrendverzeichnis.setFont(self.fontNormal)
+        self.pushButtonTrendverzeichnis = QPushButton("...")
+        self.pushButtonTrendverzeichnis.setFont(self.fontNormal)
+        self.pushButtonTrendverzeichnis.setToolTip("Trendverzeichnis auswählen")
+        self.pushButtonTrendverzeichnis.clicked.connect(self.pushButtonTrendverzeichnisClicked)
+        labelScoreGdt = QLabel("<table><tr><td>&#x2a;</td><td><span style='font-weight:normal'>Die Trenderstellung des Barthel-Index und des Timed \"Up and Go\"-Tests<br />ist eine Funktion von <a style='color:rgb(0,0,200)' href='https://gdttools.de/scoregdt.php'>ScoreGDT</a>.</td></tr></table")
+        labelScoreGdt.setTextFormat(Qt.TextFormat.RichText)
+        labelScoreGdt.linkActivated.connect(self.gdtToolsLinkGeklickt)
+        groupboxTrenderstellungLayoutG.addWidget(labelTrendverzeichnis, 0, 0)
+        groupboxTrenderstellungLayoutG.addWidget(self.lineEditTrendverzeichnis, 0, 1)
+        groupboxTrenderstellungLayoutG.addWidget(self.pushButtonTrendverzeichnis, 0, 2)
+        groupboxTrenderstellungLayoutG.addWidget(labelScoreGdt, 1, 0, 1, 3)
+        groupboxTrenderstellung.setLayout(groupboxTrenderstellungLayoutG)
+
         # GroupBox Updates
         groupBoxUpdatesLayoutG = QGridLayout()
         groupBoxUpdates = QGroupBox("Updates")
@@ -162,6 +184,7 @@ class EinstellungenAllgemein(QDialog):
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
         dialogLayoutV.addWidget(groupboxPdfErstellung)
+        dialogLayoutV.addWidget(groupboxTrenderstellung)
         dialogLayoutV.addWidget(groupBoxUpdates)
         dialogLayoutV.addWidget(self.buttonBox)
         dialogLayoutV.setContentsMargins(10, 10, 10, 10)
@@ -199,6 +222,17 @@ class EinstellungenAllgemein(QDialog):
         if newState:
             self.checkboxPdfErstellen.setChecked(True)
 
+    def pushButtonTrendverzeichnisClicked(self):
+        fd = QFileDialog(self)
+        fd.setFileMode(QFileDialog.FileMode.Directory)
+        fd.setModal(True)
+        fd.setLabelText(QFileDialog.DialogLabel.Accept, "Ok")
+        fd.setLabelText(QFileDialog.DialogLabel.Reject, "Abbrechen")
+        if fd.exec() == 1:
+            pfad = fd.directory().absolutePath()
+            self.lineEditTrendverzeichnis.setText(pfad)
+            self.trendverzeichnis = pfad
+
     def pushButtonUpdaterPfadClicked(self):
         fd = QFileDialog(self)
         fd.setFileMode(QFileDialog.FileMode.ExistingFile)
@@ -216,6 +250,9 @@ class EinstellungenAllgemein(QDialog):
             self.lineEditUpdaterPfad.setText(os.path.abspath(fd.selectedFiles()[0]))
             self.lineEditUpdaterPfad.setToolTip(os.path.abspath(fd.selectedFiles()[0]))
             self.lineEditUpdaterPfad.setStyleSheet("background:rgb(255,255,255)")
+
+    def gdtToolsLinkGeklickt(self, link):
+        QDesktopServices.openUrl(link)
 
     def accept(self):
         regexPattern = "[/.,]"

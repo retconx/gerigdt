@@ -2,6 +2,7 @@ import sys, configparser, os, datetime, shutil, logger, subprocess, atexit
 import gdt, gdtzeile, gdttoolsL
 import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport, dialogEula
 import geriasspdf
+import class_trends
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QEvent
 from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices, QKeyEvent
 from PySide6.QtWidgets import (
@@ -83,7 +84,7 @@ class MainWindow(QMainWindow):
     barthelBettRollstuhltransfer = ["Abhängig von fremder Hilfe, fehlende Sitzbalance (0)", "Erhebliche physische Hilfe beim Transfer erforderlich, Sitzen selbstständig (5)", "Geringe physische bzw. verbale Hilfe oder Beaufsichtigung erforderlich (10)", "Selbstständig, benötigt keine Hilfe (15)"]
     barthelMobilitaet = ["Immobil bzw. Strecke < 50 m (0)", "Unabhängig mit Rollstuhl inklusive Ecken, Strecke > 50 m (5)", "Unterstütztes Gehen möglich, Strecke > 50 m (10)", "Selbstständiges Gehen möglich (Hilfsmittel erlaubt), Strecke > 50 m (15)"]
     barthelTreppensteigen = ["Unfähig, allein Treppe zu steigen (0)", "Benötigt Hilfe oder Überwachung beim Treppensteigen (5)", "Selbstständiges Treppensteigen möglich (10)"]
-    timedUpGo = ["< 10 Sekunden - keine Mobilitätseinschränkung", "11-19 Sekunden - leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - starke Mobilitätseinschränkung", "Test nicht möglich"]
+    timedUpGo = ["< 10 Sekunden - Keine Mobilitätseinschränkung", "11-19 Sekunden - Leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - Abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - Starke Mobilitätseinschränkung", "Test nicht möglich"]
     kognitiveFunktion = ["Keine oder leichte Einschränkung", "Mittlere Einschränkung", "Schwere Einschränkung"]
     pflegegrad = ["1", "2", "3", "4", "5", "Nicht vorhanden/unbekannt", "Beantragt"]
     verfuegungen = ["Patientenverfügung", "Vorsorgevollmacht", "Betreuungsverfügung"]
@@ -198,6 +199,10 @@ class MainWindow(QMainWindow):
             self.autoupdate = self.configIni["Allgemein"]["autoupdate"] == "True"
         if self.configIni.has_option("Allgemein", "updaterpfad"):
             self.updaterpfad = self.configIni["Allgemein"]["updaterpfad"]
+        # 3.12.0
+        self.trendverzeichnis = ""
+        if self.configIni.has_option("Allgemein", "trendverzeichnis"):
+            self.trendverzeichnis = self.configIni["Allgemein"]["trendverzeichnis"]
         # /Nachträglich hinzufefügte Options
 
         z = self.configIni["GDT"]["zeichensatz"]
@@ -276,6 +281,9 @@ class MainWindow(QMainWindow):
                     self.configIni["Allgemein"]["autoupdate"] = "True"
                 if not self.configIni.has_option("Allgemein", "updaterpfad"):
                     self.configIni["Allgemein"]["updaterpfad"] = ""
+                # 3.12.1 -> 3.13.0
+                if not self.configIni.has_option("Allgemein", "trendverzeichnis"):
+                    self.configIni["Allgemein"]["trendverzeichnis"] = ""
                 # /config.ini aktualisieren
 
                 with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
@@ -937,6 +945,7 @@ class MainWindow(QMainWindow):
                 self.configIni["Allgemein"]["einrichtunguebernehmen"] = "1"
             self.configIni["Allgemein"]["updaterpfad"] = de.lineEditUpdaterPfad.text()
             self.configIni["Allgemein"]["autoupdate"] = str(de.checkBoxAutoUpdate.isChecked())
+            self.configIni["Allgemein"]["trendverzeichnis"] = de.lineEditTrendverzeichnis.text()
             with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
@@ -1252,6 +1261,39 @@ class MainWindow(QMainWindow):
                 else:
                     logger.logger.warning("Dokuverzeichnis existiert nicht")
                     mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Speichern der Dokumentation nicht möglich\nBitte überprüfen Sie die Angabe des Dokumentations-Speicherverzeichnisses.", QMessageBox.StandardButton.Ok)
+                    mb.exec()
+            # trends.xml gegebenenfalls aktualisieren
+            if self.trendverzeichnis != "" and os.path.exists(self.trendverzeichnis):
+                # Barthel
+                test = class_trends.Test("Barthel-Index", "Geriatrie", class_trends.GdtTool.GERIGDT) # type: ignore
+                trend = class_trends.Trend(datetime.datetime(self.untdatEdit.date().year(), self.untdatEdit.date().month(), self.untdatEdit.date().day(), datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second), str(barthelGesamt) + " Punkte", "")
+                try:
+                    class_trends.aktualisiereXmlDatei(test, trend, os.path.join(self.trendverzeichnis, "trends.xml"))
+                    logger.logger.info("trends.xml mit Barthel aktualisiert")
+                except class_trends.XmlPfadExistiertNichtError as e:
+                    logger.logger.info(e)
+                    test.addTrend(trend)
+                    test.speichereAlsNeueXmlDatei(os.path.join(self.trendverzeichnis, "trends.xml"))
+                except class_trends.TrendError as e:
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Aktualisieren/Speichern der Trenddaten: " + e.message, QMessageBox.StandardButton.Ok)
+                    mb.exec()
+                # TUG
+                ergebnis = tugErgebnis
+                interpretation = ""
+                if len(tugErgebnis.split(" - ")) > 1:
+                    ergebnis = tugErgebnis.split(" - ")[0]
+                    interpretation = tugErgebnis.split(" - ")[1]
+                test = class_trends.Test("Timed \"Up and Go\"-Test", "Geriatrie", class_trends.GdtTool.GERIGDT) # type: ignore
+                trend = class_trends.Trend(datetime.datetime(self.untdatEdit.date().year(), self.untdatEdit.date().month(), self.untdatEdit.date().day(), datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second), ergebnis, interpretation)
+                try:
+                    class_trends.aktualisiereXmlDatei(test, trend, os.path.join(self.trendverzeichnis, "trends.xml"))
+                    logger.logger.info("trends.xml mit TUG aktualisiert")
+                except class_trends.XmlPfadExistiertNichtError as e:
+                    logger.logger.info(e)
+                    test.addTrend(trend)
+                    test.speichereAlsNeueXmlDatei(os.path.join(self.trendverzeichnis, "trends.xml"))
+                except class_trends.TrendError as e:
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Aktualisieren/Speichern der Trenddaten: " + e.message, QMessageBox.StandardButton.Ok)
                     mb.exec()
         sys.exit()
 
