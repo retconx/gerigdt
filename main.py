@@ -339,7 +339,7 @@ class MainWindow(QMainWindow):
             senderId = self.configIni["GDT"]["idpraxisedv"]
             if senderId == "":
                 senderId = None
-            gd.laden(self.gdtImportVerzeichnis + "/" + self.kuerzelgerigdt + self.kuerzelpraxisedv + ".gdt", self.zeichensatz, senderId)
+            gd.laden(self.gdtImportVerzeichnis + os.sep + self.kuerzelgerigdt + self.kuerzelpraxisedv + ".gdt", self.zeichensatz, senderId)
             self.patId = str(gd.getInhalt("3000"))
             self.name = str(gd.getInhalt("3102")) + " " + str(gd.getInhalt("3101"))
             logger.logger.info("PatientIn " + self.name + " (ID: " + self.patId + ") geladen")
@@ -734,11 +734,11 @@ class MainWindow(QMainWindow):
         return False
 
     def mitVorherigerUntersuchungAusfuellen(self):
-        pfad = self.dokuVerzeichnis + "/" + self.patId
+        pfad = self.dokuVerzeichnis + os.sep+ self.patId
         doku = ""
         if os.path.exists(self.dokuVerzeichnis):
             if os.path.exists(pfad) and len(os.listdir(pfad)) > 0:
-                dokus = [d for d in os.listdir(pfad) if os.path.isfile(pfad + "/" + d)]
+                dokus = [d for d in os.listdir(pfad) if os.path.isfile(pfad + os.sep + d)]
                 dokus.sort()
                 # Ältere Dokus löschen
                 if len(dokus) > 3:
@@ -749,7 +749,7 @@ class MainWindow(QMainWindow):
                         except Exception as e:
                             logger.logger.warning("Fehler beim Löschen von Dokufile " + os.path.join(pfad, dokus[i]) + ": " + str(e))
                 try:
-                    with open(pfad + "/" + dokus[len(dokus) - 1], "r") as d:
+                    with open(pfad + os.sep + dokus[len(dokus) - 1], "r") as d:
                         doku = d.read().strip()
                 except IOError as e:
                     mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Lesen der vorherigen Dokumentation.\nSoll GeriGDT neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -1235,8 +1235,8 @@ class MainWindow(QMainWindow):
                 logger.logger.error("Fehler bei PDF-Output nach " + os.path.join(basedir, "pdf/geriass_temp.pdf"))
             
         # GDT-Datei exportieren
-        if not gd.speichern(self.gdtExportVerzeichnis + "/" + self.kuerzelpraxisedv + self.kuerzelgerigdt + ".gdt", self.zeichensatz):
-            logger.logger.error("Fehler bei GDT-Dateiexport nach " + self.gdtExportVerzeichnis + "/" + self.kuerzelpraxisedv + self.kuerzelgerigdt + ".gdt")
+        if not gd.speichern(self.gdtExportVerzeichnis + os.sep + self.kuerzelpraxisedv + self.kuerzelgerigdt + ".gdt", self.zeichensatz):
+            logger.logger.error("Fehler bei GDT-Dateiexport nach " + self.gdtExportVerzeichnis + os.sep + self.kuerzelpraxisedv + self.kuerzelgerigdt + ".gdt")
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "GDT-Export nicht möglich.\nBitte überprüfen Sie die Angabe des Exportverzeichnisses.", QMessageBox.StandardButton.Ok)
             mb.exec()
         else:
@@ -1245,10 +1245,10 @@ class MainWindow(QMainWindow):
                 if os.path.exists(self.dokuVerzeichnis):
                     speicherdatum = str(self.untdatEdit.date().year()) + "{:>02}".format(str(self.untdatEdit.date().month())) + "{:>02}".format(str(self.untdatEdit.date().day()))
                     try:
-                        if not os.path.exists(self.dokuVerzeichnis + "/" + self.patId):
-                            os.mkdir(self.dokuVerzeichnis + "/" + self.patId, 0o777)
+                        if not os.path.exists(self.dokuVerzeichnis + os.sep + self.patId):
+                            os.mkdir(self.dokuVerzeichnis + os.sep + self.patId, 0o777)
                             logger.logger.info("Dokuverzeichnis für PatId " + self.patId + " erstellt")
-                        with open(self.dokuVerzeichnis + "/" + self.patId + "/" + speicherdatum + "_" + self.patId + ".gba", "w") as zf:
+                        with open(self.dokuVerzeichnis + os.sep + self.patId + os.sep + speicherdatum + "_" + self.patId + ".gba", "w") as zf:
                             zf.write(dokuZusammenfassung)
                             logger.logger.info("Doku für PatId " + self.patId + " archiviert")
                     except IOError as e:
@@ -1267,13 +1267,16 @@ class MainWindow(QMainWindow):
                 # Barthel
                 test = class_trends.Test("Barthel-Index", "Geriatrie", class_trends.GdtTool.GERIGDT) # type: ignore
                 trend = class_trends.Trend(datetime.datetime(self.untdatEdit.date().year(), self.untdatEdit.date().month(), self.untdatEdit.date().day(), datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second), str(barthelGesamt) + " Punkte", "")
+                if not os.path.exists(os.path.join(self.trendverzeichnis, self.patId)):
+                    os.mkdir(self.trendverzeichnis + os.path.sep + self.patId, 0o777)
+                    logger.logger.info("Trendverzeichnis für PatId " + self.patId + " erstellt")
                 try:
-                    class_trends.aktualisiereXmlDatei(test, trend, os.path.join(self.trendverzeichnis, "trends.xml"))
+                    class_trends.aktualisiereXmlDatei(test, trend, os.path.join(self.trendverzeichnis, self.patId, "trends.xml"))
                     logger.logger.info("trends.xml mit Barthel aktualisiert")
                 except class_trends.XmlPfadExistiertNichtError as e:
                     logger.logger.info(e)
                     test.addTrend(trend)
-                    test.speichereAlsNeueXmlDatei(os.path.join(self.trendverzeichnis, "trends.xml"))
+                    test.speichereAlsNeueXmlDatei(os.path.join(self.trendverzeichnis, self.patId, "trends.xml"))
                 except class_trends.TrendError as e:
                     mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Aktualisieren/Speichern der Trenddaten: " + e.message, QMessageBox.StandardButton.Ok)
                     mb.exec()
@@ -1286,12 +1289,12 @@ class MainWindow(QMainWindow):
                 test = class_trends.Test("Timed \"Up and Go\"-Test", "Geriatrie", class_trends.GdtTool.GERIGDT) # type: ignore
                 trend = class_trends.Trend(datetime.datetime(self.untdatEdit.date().year(), self.untdatEdit.date().month(), self.untdatEdit.date().day(), datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second), ergebnis, interpretation)
                 try:
-                    class_trends.aktualisiereXmlDatei(test, trend, os.path.join(self.trendverzeichnis, "trends.xml"))
+                    class_trends.aktualisiereXmlDatei(test, trend, os.path.join(self.trendverzeichnis, self.patId, "trends.xml"))
                     logger.logger.info("trends.xml mit TUG aktualisiert")
                 except class_trends.XmlPfadExistiertNichtError as e:
                     logger.logger.info(e)
                     test.addTrend(trend)
-                    test.speichereAlsNeueXmlDatei(os.path.join(self.trendverzeichnis, "trends.xml"))
+                    test.speichereAlsNeueXmlDatei(os.path.join(self.trendverzeichnis, self.patId, "trends.xml"))
                 except class_trends.TrendError as e:
                     mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Aktualisieren/Speichern der Trenddaten: " + e.message, QMessageBox.StandardButton.Ok)
                     mb.exec()

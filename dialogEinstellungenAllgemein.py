@@ -137,10 +137,10 @@ class EinstellungenAllgemein(QDialog):
         groupboxLayoutPdfErstellung.addWidget(labelPdfBezeichnung, 5, 0)
         groupboxLayoutPdfErstellung.addWidget(self.lineEditPdfBezeichnung, 6, 0)
 
-        # GroupBox Trenderstellung
-        groupboxTrenderstellungLayoutG = QGridLayout()
-        groupboxTrenderstellung = QGroupBox("Trenderstellung\u002a")
-        groupboxTrenderstellung.setFont(self.fontBold)
+        # GroupBox Trendanzeige
+        groupboxTrendanzeigeLayoutG = QGridLayout()
+        groupboxTrendanzeige = QGroupBox("Trendanzeige\u002a")
+        groupboxTrendanzeige.setFont(self.fontBold)
         labelTrendverzeichnis = QLabel("Trendverzeichnis")
         labelTrendverzeichnis.setFont(self.fontNormal)
         self.lineEditTrendverzeichnis = QLineEdit(self.trendverzeichnis)
@@ -149,14 +149,14 @@ class EinstellungenAllgemein(QDialog):
         self.pushButtonTrendverzeichnis.setFont(self.fontNormal)
         self.pushButtonTrendverzeichnis.setToolTip("Trendverzeichnis auswählen")
         self.pushButtonTrendverzeichnis.clicked.connect(self.pushButtonTrendverzeichnisClicked)
-        labelScoreGdt = QLabel("<table><tr><td>&#x2a;</td><td><span style='font-weight:normal'>Die Trenderstellung des Barthel-Index und des Timed \"Up and Go\"-Tests<br />ist eine Funktion von <a style='color:rgb(0,0,200)' href='https://gdttools.de/scoregdt.php'>ScoreGDT</a>.</td></tr></table")
+        labelScoreGdt = QLabel("<table><tr><td>&#x2a;</td><td><span style='font-weight:normal'>Die Trendanzeige des Barthel-Index und des Timed \"Up and Go\"-Tests<br />ist eine Funktion von <a style='color:rgb(0,0,200)' href='https://gdttools.de/scoregdt.php'>ScoreGDT</a>.</td></tr></table")
         labelScoreGdt.setTextFormat(Qt.TextFormat.RichText)
         labelScoreGdt.linkActivated.connect(self.gdtToolsLinkGeklickt)
-        groupboxTrenderstellungLayoutG.addWidget(labelTrendverzeichnis, 0, 0)
-        groupboxTrenderstellungLayoutG.addWidget(self.lineEditTrendverzeichnis, 0, 1)
-        groupboxTrenderstellungLayoutG.addWidget(self.pushButtonTrendverzeichnis, 0, 2)
-        groupboxTrenderstellungLayoutG.addWidget(labelScoreGdt, 1, 0, 1, 3)
-        groupboxTrenderstellung.setLayout(groupboxTrenderstellungLayoutG)
+        groupboxTrendanzeigeLayoutG.addWidget(labelTrendverzeichnis, 0, 0)
+        groupboxTrendanzeigeLayoutG.addWidget(self.lineEditTrendverzeichnis, 0, 1)
+        groupboxTrendanzeigeLayoutG.addWidget(self.pushButtonTrendverzeichnis, 0, 2)
+        groupboxTrendanzeigeLayoutG.addWidget(labelScoreGdt, 1, 0, 1, 3)
+        groupboxTrendanzeige.setLayout(groupboxTrendanzeigeLayoutG)
 
         # GroupBox Updates
         groupBoxUpdatesLayoutG = QGridLayout()
@@ -184,7 +184,7 @@ class EinstellungenAllgemein(QDialog):
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
         dialogLayoutV.addWidget(groupboxPdfErstellung)
-        dialogLayoutV.addWidget(groupboxTrenderstellung)
+        dialogLayoutV.addWidget(groupboxTrendanzeige)
         dialogLayoutV.addWidget(groupBoxUpdates)
         dialogLayoutV.addWidget(self.buttonBox)
         dialogLayoutV.setContentsMargins(10, 10, 10, 10)
