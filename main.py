@@ -614,9 +614,9 @@ class MainWindow(QMainWindow):
             self.untdatEdit.setDate(untdat.currentDate())
             self.untdatEdit.setDisplayFormat("dd.MM.yyyy")
             self.untdatEdit.setCalendarPopup(True)
-            self.untdatEdit.userDateChanged.connect(self.datumGeaendert) # type: ignore
+            self.untdatEdit.userDateChanged.connect(self.datumGeaendert)
             self.dokuvonComboBox = QComboBox()
-            self.dokuvonComboBox.currentIndexChanged.connect(self.benutzerGewechselt)# type: ignore
+            self.dokuvonComboBox.currentIndexChanged.connect(self.benutzerGewechselt)
             benutzernamen = self.configIni["Benutzer"]["namen"].split("::")
             benutzerkuerzel = self.configIni["Benutzer"]["kuerzel"].split("::")
             for i in range(len(benutzernamen)):
@@ -1267,6 +1267,7 @@ class MainWindow(QMainWindow):
                 # Barthel
                 test = class_trends.Test("Barthel-Index", "Geriatrie", class_trends.GdtTool.GERIGDT) # type: ignore
                 trend = class_trends.Trend(datetime.datetime(self.untdatEdit.date().year(), self.untdatEdit.date().month(), self.untdatEdit.date().day(), datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second), str(barthelGesamt) + " Punkte", "")
+                print(trend)
                 if not os.path.exists(os.path.join(self.trendverzeichnis, self.patId)):
                     os.mkdir(self.trendverzeichnis + os.path.sep + self.patId, 0o777)
                     logger.logger.info("Trendverzeichnis für PatId " + self.patId + " erstellt")

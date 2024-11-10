@@ -80,6 +80,14 @@ class Test:
         Parameter:
             trend:Trend
         """
+        # Gegebenenfalls Trends gleichen Datums löschen
+        datum = trend.getTrend()["datum"]
+        for i in range(len(self.datumListe) - 1, -1, -1):
+            if self.datumListe[i].date() == datum.date():
+                self.datumListe.pop(i)
+                self.ergebnisListe.pop(i)
+                self.interpretationListe.pop(i)
+                self.anzahlTrends -= 1
         self.datumListe.append(trend.getTrend()["datum"])
         self.ergebnisListe.append(trend.getTrend()["ergebnis"])
         self.interpretationListe.append(trend.getTrend()["interpretation"])
@@ -104,7 +112,6 @@ class Test:
         reihenfolge = sorted([i for i in range(self.anzahlTrends)], key=lambda x:self.datumListe[x], reverse=True)
         for i in reihenfolge:
             trends.append(Trend(self.datumListe[i], self.ergebnisListe[i], self.interpretationListe[i]))
-        # trends = [(self.datumListe[i], self.ergebnisListe[i], self.interpretationListe[i]) for i in reihenfolge]
         return trends
     
     def getXmlElement(self) -> ElementTree.Element:
