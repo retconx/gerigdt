@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
     barthelBettRollstuhltransfer = ["Abhängig von fremder Hilfe, fehlende Sitzbalance (0)", "Erhebliche physische Hilfe beim Transfer erforderlich, Sitzen selbstständig (5)", "Geringe physische bzw. verbale Hilfe oder Beaufsichtigung erforderlich (10)", "Selbstständig, benötigt keine Hilfe (15)"]
     barthelMobilitaet = ["Immobil bzw. Strecke < 50 m (0)", "Unabhängig mit Rollstuhl inklusive Ecken, Strecke > 50 m (5)", "Unterstütztes Gehen möglich, Strecke > 50 m (10)", "Selbstständiges Gehen möglich (Hilfsmittel erlaubt), Strecke > 50 m (15)"]
     barthelTreppensteigen = ["Unfähig, allein Treppe zu steigen (0)", "Benötigt Hilfe oder Überwachung beim Treppensteigen (5)", "Selbstständiges Treppensteigen möglich (10)"]
-    timedUpGo = ["< 10 Sekunden - Keine Mobilitätseinschränkung", "11-19 Sekunden - Leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - Abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - Starke Mobilitätseinschränkung", "Test nicht möglich"]
+    timedUpGo = ["< 10 Sekunden - Keine Mobilitätseinschränkung", "11-19 Sekunden - Leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - Abklärungsbedürftige, relevante Mobilitätseinschränkung", "> 30 Sekunden - Starke Mobilitätseinschränkung", "Durchführung nicht möglich"]
     kognitiveFunktion = ["Keine oder leichte Einschränkung", "Mittlere Einschränkung", "Schwere Einschränkung"]
     pflegegrad = ["1", "2", "3", "4", "5", "Nicht vorhanden/unbekannt", "Beantragt"]
     verfuegungen = ["Patientenverfügung", "Vorsorgevollmacht", "Betreuungsverfügung"]
@@ -333,6 +333,11 @@ class MainWindow(QMainWindow):
         self.geburtsdatum = "-"
         self.groesse = "-"
         self.gewicht = "-"
+        styleSheetBarthel = "background:rgb(240,240,255)"
+        styleSheetTug = "background:rgb(240,255,255)"
+        styleSheetKognitiv = "background:rgb(240,255,240)"
+        styleSheetPflegegrad = "background:rgb(255,255,240)"
+        styleSheetVerfuegungen = "background:rgb(255,240,240)"
         mbErg = QMessageBox.StandardButton.Yes
         try:
             # Prüfen, ob PVS-GDT-ID eingetragen
@@ -404,6 +409,7 @@ class MainWindow(QMainWindow):
             self.labelBarthelGesamt.setStyleSheet("color:rgb(100,100,100)")
             groupboxLayout = QVBoxLayout()
             groupboxBarthelEssen = QGroupBox(title="Essen")
+            groupboxBarthelEssen.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelEssen = []
             for radio in self.barthelEssen:
                 rb = QRadioButton(text=radio)
@@ -417,6 +423,7 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelBaden = QGroupBox(title="Baden")
+            groupboxBarthelBaden.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelBaden = []
             for radio in self.barthelBaden:
                 rb = QRadioButton(text=radio)
@@ -430,6 +437,7 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelKoerperpflege = QGroupBox(title="Körperpflege (Rasieren, Zähneputzen)")
+            groupboxBarthelKoerperpflege.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelKoerperpflege = []
             for radio in self.barthelKoerperpflege:
                 rb = QRadioButton(text=radio)
@@ -443,6 +451,7 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelAnAuskleiden = QGroupBox(title="An- und Auskleiden")
+            groupboxBarthelAnAuskleiden.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelAnAuskleiden = []
             for radio in self.barthelAnAuskleiden:
                 rb = QRadioButton(text=radio)
@@ -456,6 +465,7 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelStuhlkontrolle = QGroupBox(title="Stuhlkontrolle")
+            groupboxBarthelStuhlkontrolle.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelStuhlkontrolle = []
             for radio in self.barthelStuhlkontrolle:
                 rb = QRadioButton(text=radio)
@@ -469,6 +479,7 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelUrinkontrolle = QGroupBox(title="Urinkontrolle")
+            groupboxBarthelUrinkontrolle.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelUrinkontrolle = []
             for radio in self.barthelUrinkontrolle:
                 rb = QRadioButton(text=radio)
@@ -482,6 +493,7 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelToilettenbenutzung = QGroupBox(title="Toilettenbenutzung")
+            groupboxBarthelToilettenbenutzung.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelToilettenbenutzung = []
             for radio in self.barthelToilettenbenutzung:
                 rb = QRadioButton(text=radio)
@@ -495,6 +507,7 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelBettRollstuhltransfer = QGroupBox(title="Bett-/ (Roll-)-Stuhltransfer")
+            groupboxBarthelBettRollstuhltransfer.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelBettRollstuhltransfer = []
             for radio in self.barthelBettRollstuhltransfer:
                 rb = QRadioButton(text=radio)
@@ -508,6 +521,7 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelMobilitaet = QGroupBox(title="Mobilität")
+            groupboxBarthelMobilitaet.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelMobilitaet = []
             for radio in self.barthelMobilitaet:
                 rb = QRadioButton(text=radio)
@@ -521,6 +535,7 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelTreppensteigen = QGroupBox(title="Treppensteigen")
+            groupboxBarthelTreppensteigen.setStyleSheet(styleSheetBarthel)
             self.radiobuttonBarhelTreppensteigen = []
             for radio in self.barthelTreppensteigen:
                 rb = QRadioButton(text=radio)
@@ -533,7 +548,8 @@ class MainWindow(QMainWindow):
             groupboxBarthelTreppensteigen.setFont(fontBold)
             
             groupboxLayout = QVBoxLayout()
-            groupboxTimedUpGo = QGroupBox(title="Timed \"Up and Go\"")
+            groupboxTimedUpGo = QGroupBox(title="Timed \"Up and Go\"-Test")
+            groupboxTimedUpGo.setStyleSheet(styleSheetTug)
             self.radiobuttonTimedUpGo = []
             for radio in self.timedUpGo:
                 rb = QRadioButton(text=radio)
@@ -547,6 +563,7 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxKognitiveFunktion = QGroupBox("Kognitive Funktion")
+            groupboxKognitiveFunktion.setStyleSheet(styleSheetKognitiv)
             self.radiobuttonKognitiveFunktion = []
             for radio in self.kognitiveFunktion:
                 rb = QRadioButton(text=radio)
@@ -560,6 +577,7 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxPflegegrad = QGroupBox("Pflegegrad")
+            groupboxPflegegrad.setStyleSheet(styleSheetPflegegrad)
             self.radiobuttonPflegegrad = []
             for radio in self.pflegegrad:
                 rb = QRadioButton(text=radio)
@@ -573,6 +591,7 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxVerfuegungen = QGroupBox("Verfügungen/Vollmachten")
+            groupboxVerfuegungen.setStyleSheet(styleSheetVerfuegungen)
             self.checkboxVerfuegungen = []
             for checkbox in self.verfuegungen:
                 cb = QCheckBox(text=checkbox)
