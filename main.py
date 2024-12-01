@@ -1,5 +1,5 @@
 import sys, configparser, os, datetime, shutil, logger, subprocess, atexit
-import gdt, gdtzeile, gdttoolsL
+import gdt, gdtzeile, gdttoolsL, farbe
 import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport, dialogEula
 import geriasspdf
 import class_trends
@@ -323,6 +323,9 @@ class MainWindow(QMainWindow):
         font.setBold(False)
         fontBold = QFont()
         fontBold.setBold(True)
+        fontGross = QFont()
+        fontGross.setBold(False)
+        fontGross.setPixelSize(16)
         fontBoldGross = QFont()
         fontBoldGross.setBold(True)
         fontBoldGross.setPixelSize(16)
@@ -405,11 +408,11 @@ class MainWindow(QMainWindow):
             barthelLabel = QLabel(text="Barthel-Index")
             barthelLabel.setFont(fontBoldGross)
             self.labelBarthelGesamt = QLabel("Gesamt: 100 Punkte")
-            self.labelBarthelGesamt.setFont(fontBoldGross)
-            self.labelBarthelGesamt.setStyleSheet("color:rgb(100,100,100)")
+            self.labelBarthelGesamt.setFont(fontGross)
             groupboxLayout = QVBoxLayout()
             groupboxBarthelEssen = QGroupBox(title="Essen")
-            groupboxBarthelEssen.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelEssen.setAutoFillBackground(True)
+            groupboxBarthelEssen.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelEssen = []
             for radio in self.barthelEssen:
                 rb = QRadioButton(text=radio)
@@ -423,7 +426,8 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelBaden = QGroupBox(title="Baden")
-            groupboxBarthelBaden.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelBaden.setAutoFillBackground(True)
+            groupboxBarthelBaden.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelBaden = []
             for radio in self.barthelBaden:
                 rb = QRadioButton(text=radio)
@@ -437,7 +441,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelKoerperpflege = QGroupBox(title="Körperpflege (Rasieren, Zähneputzen)")
-            groupboxBarthelKoerperpflege.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelKoerperpflege.setAutoFillBackground(True)
+            groupboxBarthelKoerperpflege.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelKoerperpflege = []
             for radio in self.barthelKoerperpflege:
                 rb = QRadioButton(text=radio)
@@ -451,7 +456,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelAnAuskleiden = QGroupBox(title="An- und Auskleiden")
-            groupboxBarthelAnAuskleiden.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelAnAuskleiden.setAutoFillBackground(True)
+            groupboxBarthelAnAuskleiden.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelAnAuskleiden = []
             for radio in self.barthelAnAuskleiden:
                 rb = QRadioButton(text=radio)
@@ -465,7 +471,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelStuhlkontrolle = QGroupBox(title="Stuhlkontrolle")
-            groupboxBarthelStuhlkontrolle.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelStuhlkontrolle.setAutoFillBackground(True)
+            groupboxBarthelStuhlkontrolle.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelStuhlkontrolle = []
             for radio in self.barthelStuhlkontrolle:
                 rb = QRadioButton(text=radio)
@@ -479,7 +486,8 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelUrinkontrolle = QGroupBox(title="Urinkontrolle")
-            groupboxBarthelUrinkontrolle.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelUrinkontrolle.setAutoFillBackground(True)
+            groupboxBarthelUrinkontrolle.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelUrinkontrolle = []
             for radio in self.barthelUrinkontrolle:
                 rb = QRadioButton(text=radio)
@@ -493,7 +501,8 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelToilettenbenutzung = QGroupBox(title="Toilettenbenutzung")
-            groupboxBarthelToilettenbenutzung.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelToilettenbenutzung.setAutoFillBackground(True)
+            groupboxBarthelToilettenbenutzung.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelToilettenbenutzung = []
             for radio in self.barthelToilettenbenutzung:
                 rb = QRadioButton(text=radio)
@@ -507,7 +516,8 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxBarthelBettRollstuhltransfer = QGroupBox(title="Bett-/ (Roll-)-Stuhltransfer")
-            groupboxBarthelBettRollstuhltransfer.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelBettRollstuhltransfer.setAutoFillBackground(True)
+            groupboxBarthelBettRollstuhltransfer.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelBettRollstuhltransfer = []
             for radio in self.barthelBettRollstuhltransfer:
                 rb = QRadioButton(text=radio)
@@ -521,7 +531,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelMobilitaet = QGroupBox(title="Mobilität")
-            groupboxBarthelMobilitaet.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelMobilitaet.setAutoFillBackground(True)
+            groupboxBarthelMobilitaet.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelMobilitaet = []
             for radio in self.barthelMobilitaet:
                 rb = QRadioButton(text=radio)
@@ -535,7 +546,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxBarthelTreppensteigen = QGroupBox(title="Treppensteigen")
-            groupboxBarthelTreppensteigen.setStyleSheet(styleSheetBarthel)
+            groupboxBarthelTreppensteigen.setAutoFillBackground(True)
+            groupboxBarthelTreppensteigen.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelTreppensteigen = []
             for radio in self.barthelTreppensteigen:
                 rb = QRadioButton(text=radio)
@@ -549,7 +561,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxTimedUpGo = QGroupBox(title="Timed \"Up and Go\"-Test")
-            groupboxTimedUpGo.setStyleSheet(styleSheetTug)
+            groupboxTimedUpGo.setAutoFillBackground(True)
+            groupboxTimedUpGo.setPalette(farbe.getTextPalette(farbe.farben.TUERKIS, self.palette()))
             self.radiobuttonTimedUpGo = []
             for radio in self.timedUpGo:
                 rb = QRadioButton(text=radio)
@@ -563,7 +576,8 @@ class MainWindow(QMainWindow):
             
             groupboxLayout = QVBoxLayout()
             groupboxKognitiveFunktion = QGroupBox("Kognitive Funktion")
-            groupboxKognitiveFunktion.setStyleSheet(styleSheetKognitiv)
+            groupboxKognitiveFunktion.setAutoFillBackground(True)
+            groupboxKognitiveFunktion.setPalette(farbe.getTextPalette(farbe.farben.GRUEN, self.palette()))
             self.radiobuttonKognitiveFunktion = []
             for radio in self.kognitiveFunktion:
                 rb = QRadioButton(text=radio)
@@ -577,7 +591,8 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxPflegegrad = QGroupBox("Pflegegrad")
-            groupboxPflegegrad.setStyleSheet(styleSheetPflegegrad)
+            groupboxPflegegrad.setAutoFillBackground(True)
+            groupboxPflegegrad.setPalette(farbe.getTextPalette(farbe.farben.GELB, self.palette()))
             self.radiobuttonPflegegrad = []
             for radio in self.pflegegrad:
                 rb = QRadioButton(text=radio)
@@ -591,7 +606,8 @@ class MainWindow(QMainWindow):
 
             groupboxLayout = QVBoxLayout()
             groupboxVerfuegungen = QGroupBox("Verfügungen/Vollmachten")
-            groupboxVerfuegungen.setStyleSheet(styleSheetVerfuegungen)
+            groupboxVerfuegungen.setAutoFillBackground(True)
+            groupboxVerfuegungen.setPalette(farbe.getTextPalette(farbe.farben.ROT, self.palette()))
             self.checkboxVerfuegungen = []
             for checkbox in self.verfuegungen:
                 cb = QCheckBox(text=checkbox)
@@ -1286,7 +1302,6 @@ class MainWindow(QMainWindow):
                 # Barthel
                 test = class_trends.Test("Barthel-Index", "Geriatrie", class_trends.GdtTool.GERIGDT) # type: ignore
                 trend = class_trends.Trend(datetime.datetime(self.untdatEdit.date().year(), self.untdatEdit.date().month(), self.untdatEdit.date().day(), datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second), str(barthelGesamt) + " Punkte", "")
-                print(trend)
                 if not os.path.exists(os.path.join(self.trendverzeichnis, self.patId)):
                     os.mkdir(self.trendverzeichnis + os.path.sep + self.patId, 0o777)
                     logger.logger.info("Trendverzeichnis für PatId " + self.patId + " erstellt")
