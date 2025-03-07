@@ -179,7 +179,7 @@ class EinstellungenAllgemein(QDialog):
         groupBoxUpdatesLayoutG.addWidget(labelUpdaterPfad, 0, 0)
         groupBoxUpdatesLayoutG.addWidget(self.lineEditUpdaterPfad, 0, 1)
         groupBoxUpdatesLayoutG.addWidget(self.pushButtonUpdaterPfad, 0, 2)
-        groupBoxUpdatesLayoutG.addWidget(self.checkBoxAutoUpdate, 1, 0)
+        groupBoxUpdatesLayoutG.addWidget(self.checkBoxAutoUpdate, 1, 0, 1, 3)
         groupBoxUpdates.setLayout(groupBoxUpdatesLayoutG)
 
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)

@@ -1195,7 +1195,7 @@ class MainWindow(QMainWindow):
                 groesse = float(self.groesse.replace(",", "."))
                 if groesse > 3:
                     groesse /= 100
-                bmi = "{:.1f}".format(float(self.gewicht.replace(",", ".")) / groesse / groesse)
+                bmi = "{:.1f}".format(float(self.gewicht.replace(",", ".")) / groesse / groesse).replace(".", ",")
 
             pdf = geriasspdf.geriasspdf ("P", "mm", "A4")
             logger.logger.info("FPDF-Instanz erzeugt")
