@@ -1,4 +1,4 @@
-import os
+import os, requests
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -26,12 +26,26 @@ class Eula(QDialog):
         labelSpende = QLabel("Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen.<br /><a href='https://gdttools.de/gerigdt.php#spende'>Hier</a> finden Sie Informationen über die Möglichkeit einer <a href='https://gdttools.de/gerigdt.php#spende' style='text-decoration:none;color(rgb(0,0,0))'><b>Spende</b></a>. Dankeschön! &#x1f609;")
         labelSpende.setTextFormat(Qt.TextFormat.RichText)
         labelSpende.linkActivated.connect(self.linkGeklickt)
+        response = requests.get("https://api.github.com/repos/retconx/dosisgdt/releases/latest")
+        body = response.json()["body"]
+        aenderungen = str.split(body, "###")[1]
+        aenderungenListe = str.split(aenderungen, "\r\n- ")
+        datum = aenderungenListe[0].strip()
+        aenderungenText = ""
+        for i in range(len(aenderungenListe)):
+            if i > 0:
+                aenderungenText += "\u00b7 " + aenderungenListe[i]
+                if i < len(aenderungenListe) - 1:
+                    aenderungenText += "\n"
+        aenderungenText = aenderungenText.replace("_", "\"")
+        labelAenderungen = QLabel("Änderungen vom " + datum + ":")
+        labelAenderungen.setStyleSheet("font-weight:bold")
+        self.labelAenderungenListe = QLabel(aenderungenText)
         labelBestaetigung = QLabel("Bitte bestätigen Sie, dass Sie die folgende Lizenzvereinbarung gelesen haben und dieser zustimmen.")
         iconsPfad = os.path.join(basedir, "icons/alleIcons200.png")
         labelAndereGdtTools = QLabel("Vielleicht sind auch die anderen GDT-Tools interessant für Sie: <a href='https://gdttools.de' style='border:none;vertical-align:middle'><img width='200' src='" + iconsPfad + "' /></a>")
         labelAndereGdtTools.setTextFormat(Qt.TextFormat.RichText)
         labelAndereGdtTools.linkActivated.connect(self.linkGeklickt)
-        #labelAndereGdtTools.setStyleSheet("background:rgb(255,255,255);border-style:solid;border-color:rgb(0,0,200);border-width:2px;border-radius:4%;padding:4px")
         text = ""
         self.textEditEula = QTextEdit()
         self.textEditEula.setReadOnly(True)
@@ -47,6 +61,8 @@ class Eula(QDialog):
             dialogLayoutV.addWidget(labelSpende)
             dialogLayoutV.addWidget(labelAndereGdtTools)
             dialogLayoutV.addSpacing(10)
+            dialogLayoutV.addWidget(labelAenderungen)
+            dialogLayoutV.addWidget(self.labelAenderungenListe)
         dialogLayoutV.addWidget(labelBestaetigung, alignment=Qt.AlignmentFlag.AlignCenter)
         dialogLayoutV.addSpacing(10)
         dialogLayoutV.addWidget(self.textEditEula)
