@@ -415,7 +415,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelEssen.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelEssen = []
             for radio in self.barthelEssen:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelEssen.append(rb)
@@ -430,7 +430,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelBaden.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelBaden = []
             for radio in self.barthelBaden:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelBaden.append(rb)
@@ -445,7 +445,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelKoerperpflege.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelKoerperpflege = []
             for radio in self.barthelKoerperpflege:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelKoerperpflege.append(rb)
@@ -460,7 +460,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelAnAuskleiden.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelAnAuskleiden = []
             for radio in self.barthelAnAuskleiden:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelAnAuskleiden.append(rb)
@@ -475,7 +475,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelStuhlkontrolle.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelStuhlkontrolle = []
             for radio in self.barthelStuhlkontrolle:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelStuhlkontrolle.append(rb)
@@ -490,7 +490,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelUrinkontrolle.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelUrinkontrolle = []
             for radio in self.barthelUrinkontrolle:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelUrinkontrolle.append(rb)
@@ -505,7 +505,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelToilettenbenutzung.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelToilettenbenutzung = []
             for radio in self.barthelToilettenbenutzung:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelToilettenbenutzung.append(rb)
@@ -520,7 +520,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelBettRollstuhltransfer.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelBettRollstuhltransfer = []
             for radio in self.barthelBettRollstuhltransfer:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelBettRollstuhltransfer.append(rb)
@@ -535,7 +535,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelMobilitaet.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelMobilitaet = []
             for radio in self.barthelMobilitaet:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelMobilitaet.append(rb)
@@ -550,7 +550,7 @@ class MainWindow(QMainWindow):
             groupboxBarthelTreppensteigen.setPalette(farbe.getTextPalette(farbe.farben.BLAU, self.palette()))
             self.radiobuttonBarhelTreppensteigen = []
             for radio in self.barthelTreppensteigen:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonBarhelTreppensteigen.append(rb)
@@ -565,7 +565,7 @@ class MainWindow(QMainWindow):
             groupboxTimedUpGo.setPalette(farbe.getTextPalette(farbe.farben.TUERKIS, self.palette()))
             self.radiobuttonTimedUpGo = []
             for radio in self.timedUpGo:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonTimedUpGo.append(rb)
@@ -580,7 +580,7 @@ class MainWindow(QMainWindow):
             groupboxKognitiveFunktion.setPalette(farbe.getTextPalette(farbe.farben.GRUEN, self.palette()))
             self.radiobuttonKognitiveFunktion = []
             for radio in self.kognitiveFunktion:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonKognitiveFunktion.append(rb)
@@ -595,7 +595,7 @@ class MainWindow(QMainWindow):
             groupboxPflegegrad.setPalette(farbe.getTextPalette(farbe.farben.GELB, self.palette()))
             self.radiobuttonPflegegrad = []
             for radio in self.pflegegrad:
-                rb = QRadioButton(text=radio)
+                rb = QRadioButton(radio)
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonPflegegrad.append(rb)
@@ -610,7 +610,7 @@ class MainWindow(QMainWindow):
             groupboxVerfuegungen.setPalette(farbe.getTextPalette(farbe.farben.ROT, self.palette()))
             self.checkboxVerfuegungen = []
             for checkbox in self.verfuegungen:
-                cb = QCheckBox(text=checkbox)
+                cb = QCheckBox(checkbox)
                 cb.setFont(font)
                 cb.stateChanged.connect(self.verfuegungGeklickt) # type: ignore
                 self.checkboxVerfuegungen.append(cb)
@@ -1287,15 +1287,15 @@ class MainWindow(QMainWindow):
                             zf.write(dokuZusammenfassung)
                             logger.logger.info("Doku für PatId " + self.patId + " archiviert")
                     except IOError as e:
-                        logger.logger.error("IO-Fehler beim Speichern der Doku von PatId " + self.patId)
-                        mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Speichern der Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
+                        logger.logger.error("IO-Fehler beim Archivieren der Doku von PatId " + self.patId)
+                        mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Fehler beim Archivieren der Dokumentation\n" + str(e), QMessageBox.StandardButton.Ok)
                         mb.exec()
                     except:
                         logger.logger.error("Nicht-IO-Fehler beim Speichern der Doku von PatId " + self.patId)
                         raise
                 else:
                     logger.logger.warning("Dokuverzeichnis existiert nicht")
-                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Speichern der Dokumentation nicht möglich\nBitte überprüfen Sie die Angabe des Dokumentations-Speicherverzeichnisses.", QMessageBox.StandardButton.Ok)
+                    mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Archivieren der Dokumentation nicht möglich\nBitte überprüfen Sie die Angabe des Archivierungsverzeichnisses.", QMessageBox.StandardButton.Ok)
                     mb.exec()
             # trends.xml gegebenenfalls aktualisieren
             if self.trendverzeichnis != "" and os.path.exists(self.trendverzeichnis):
