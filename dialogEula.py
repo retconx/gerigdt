@@ -42,10 +42,10 @@ class Eula(QDialog):
         labelAenderungen.setStyleSheet("font-weight:bold")
         self.labelAenderungenListe = QLabel(aenderungenText)
         labelBestaetigung = QLabel("Bitte bestätigen Sie, dass Sie die folgende Lizenzvereinbarung gelesen haben und dieser zustimmen.")
-        iconsPfad = os.path.join(basedir, "icons/alleIcons200.png")
-        labelAndereGdtTools = QLabel("Vielleicht sind auch die anderen GDT-Tools interessant für Sie: <a href='https://gdttools.de' style='border:none;vertical-align:middle'><img width='200' src='" + iconsPfad + "' /></a>")
-        labelAndereGdtTools.setTextFormat(Qt.TextFormat.RichText)
-        labelAndereGdtTools.linkActivated.connect(self.linkGeklickt)
+        # iconsPfad = os.path.join(basedir, "icons/alleIcons200.png")
+        # labelAndereGdtTools = QLabel("Vielleicht sind auch die anderen GDT-Tools interessant für Sie: <a href='https://gdttools.de' style='border:none;vertical-align:middle'><img width='200' src='" + iconsPfad + "' /></a>")
+        # labelAndereGdtTools.setTextFormat(Qt.TextFormat.RichText)
+        # labelAndereGdtTools.linkActivated.connect(self.linkGeklickt)
         text = ""
         self.textEditEula = QTextEdit()
         self.textEditEula.setReadOnly(True)
@@ -59,7 +59,7 @@ class Eula(QDialog):
         if neueVersion != "":
             dialogLayoutV.addWidget(labelAktualisiert)
             # dialogLayoutV.addWidget(labelSpende)
-            dialogLayoutV.addWidget(labelAndereGdtTools)
+            #dialogLayoutV.addWidget(labelAndereGdtTools)
             dialogLayoutV.addSpacing(10)
             dialogLayoutV.addWidget(labelAenderungen)
             dialogLayoutV.addWidget(self.labelAenderungenListe)
