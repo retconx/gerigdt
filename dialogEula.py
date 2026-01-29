@@ -23,10 +23,10 @@ class Eula(QDialog):
         dialogLayoutV = QVBoxLayout()
         labelAktualisiert = QLabel("GeriGDT wurde erfolgreich auf Version " + neueVersion + " aktualisiert.")
         labelAktualisiert.setStyleSheet("font-weight:bold")
-        labelSpende = QLabel("Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen.<br /><a href='https://gdttools.de/gerigdt.php#spende'>Hier</a> finden Sie Informationen über die Möglichkeit einer <a href='https://gdttools.de/gerigdt.php#spende' style='text-decoration:none;color(rgb(0,0,0))'><b>Spende</b></a>. Dankeschön! &#x1f609;")
-        labelSpende.setTextFormat(Qt.TextFormat.RichText)
-        labelSpende.linkActivated.connect(self.linkGeklickt)
-        response = requests.get("https://api.github.com/repos/retconx/dosisgdt/releases/latest")
+        # labelSpende = QLabel("Falls GeriGDT Ihren Praxisalltag erleichtert, würde ich mich über eine kleine Anerkennung freuen.<br /><a href='https://gdttools.de/gerigdt.php#spende'>Hier</a> finden Sie Informationen über die Möglichkeit einer <a href='https://gdttools.de/gerigdt.php#spende' style='text-decoration:none;color(rgb(0,0,0))'><b>Spende</b></a>. Dankeschön! &#x1f609;")
+        # labelSpende.setTextFormat(Qt.TextFormat.RichText)
+        # labelSpende.linkActivated.connect(self.linkGeklickt)
+        response = requests.get("https://api.github.com/repos/retconx/gerigdt/releases/latest")
         body = response.json()["body"]
         aenderungen = str.split(body, "###")[1]
         aenderungenListe = str.split(aenderungen, "\r\n- ")
@@ -58,7 +58,7 @@ class Eula(QDialog):
         self.checkBoxZustimmung = QCheckBox("Gelesen und zugestimmt")
         if neueVersion != "":
             dialogLayoutV.addWidget(labelAktualisiert)
-            dialogLayoutV.addWidget(labelSpende)
+            # dialogLayoutV.addWidget(labelSpende)
             dialogLayoutV.addWidget(labelAndereGdtTools)
             dialogLayoutV.addSpacing(10)
             dialogLayoutV.addWidget(labelAenderungen)

@@ -47,11 +47,14 @@ class EinstellungenBenutzer(QDialog):
         for i in range(self.maxBenutzerzahl):
             self.lineEditNamen.append(QLineEdit())
             dialogLayoutG.addWidget(self.lineEditNamen[i], i + 1, 0)
-        self.lineEditNamen[0].setPlaceholderText("Dr. med. XY")
-        for i in range(self.maxBenutzerzahl):
             self.lineEditKuerzel.append(QLineEdit())
             self.lineEditKuerzel[i].setFixedWidth(40)
             dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 1)
+        self.lineEditNamen[0].setPlaceholderText("Dr. med. XY")
+        # for i in range(self.maxBenutzerzahl):
+        #     self.lineEditKuerzel.append(QLineEdit())
+        #     self.lineEditKuerzel[i].setFixedWidth(40)
+        #     dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 1)
         for i in range(len(self.benutzernamen)):
                 self.lineEditNamen[i].setText(self.benutzernamen[i])
                 self.lineEditKuerzel[i].setText(self.benutzerkuerzel[i])
