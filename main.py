@@ -1,5 +1,8 @@
 import sys, configparser, os, datetime, shutil, logger, subprocess, atexit
-import gdt, gdtzeile, gdttoolsL, farbe
+import gdt, gdtzeile, farbe, re
+## Nur mit Lizenz
+import gdttoolsL
+## /Nur mit Lizenz
 import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, dialogEinstellungenAllgemein, dialogEinstellungenLanrLizenzschluessel, dialogEinstellungenImportExport, dialogEula
 import geriasspdf
 import class_trends
@@ -214,7 +217,8 @@ class MainWindow(QMainWindow):
         self.lanr = self.configIni["Erweiterungen"]["lanr"]
         self.lizenzschluessel = self.configIni["Erweiterungen"]["lizenzschluessel"]
 
-        # Prüfen, ob Lizenzschlüssel unverschlüsselt
+        ## Nur mit Lizenz
+        # # Prüfen, ob Lizenzschlüssel unverschlüsselt
         if len(self.lizenzschluessel) == 29:
             logger.logger.info("Lizenzschlüssel unverschlüsselt")
             self.configIni["Erweiterungen"]["lizenzschluessel"] = gdttoolsL.GdtToolsLizenzschluessel.krypt(self.lizenzschluessel)
@@ -222,6 +226,7 @@ class MainWindow(QMainWindow):
                     self.configIni.write(configfile)
         else:
             self.lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(self.lizenzschluessel)
+        ## /Nur mit Lizenz
 
         # Prüfen, ob EULA gelesen
         if not self.eulagelesen:
@@ -244,7 +249,9 @@ class MainWindow(QMainWindow):
             mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Vermutlich starten Sie GeriGDT das erste Mal auf diesem PC.\nMöchten Sie jetzt die Grundeinstellungen vornehmen?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             mb.setDefaultButton(QMessageBox.StandardButton.Yes)
             if mb.exec() == QMessageBox.StandardButton.Yes:
+                ## Nur mit Lizenz
                 self.einstellungenLanrLizenzschluessel(False, False)
+                ## /Nur mit Lizenz
                 self.einstellungenGdt(False, False)
                 self.einstellungenAllgemein(False, False)
                 self.einstellungenBenutzer(False, False)
@@ -310,9 +317,24 @@ class MainWindow(QMainWindow):
             logger.logger.error("Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"])
             mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Problem beim Aktualisieren auf Version " + configIniBase["Allgemein"]["version"], QMessageBox.StandardButton.Ok)
             mb.exec()
+        
+        self.addOnsFreigeschaltet = True
+        
+        ## Nur mit Lizenz
+        # Pseudo-Lizenz?
+        self.pseudoLizenzId = ""
+        rePatId = r"^patid\d+$"
+        for arg in sys.argv:
+            if re.match(rePatId, arg) != None:
+                logger.logger.info("Pseudo-Lizenz mit id " + arg[5:])
+                self.pseudoLizenzId = arg[5:]
 
         # Add-Ons freigeschaltet?
-        self.addOnsFreigeschaltet = gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lizenzschluessel, self.lanr, gdttoolsL.SoftwareId.GERIGDT)
+        self.addOnsFreigeschaltet = gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lizenzschluessel, self.lanr, gdttoolsL.SoftwareId.GERIGDT) or gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lizenzschluessel, self.lanr, gdttoolsL.SoftwareId.GERIGDTPSEUDO) and self.pseudoLizenzId != ""
+        if self.lizenzschluessel != "" and gdttoolsL.GdtToolsLizenzschluessel.getSoftwareId(self.lizenzschluessel) == gdttoolsL.SoftwareId.GERIGDTPSEUDO and self.pseudoLizenzId == "":
+            mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Bei Verwendung einer Pseudolizenz muss GeriGDT mit einer Patienten-Id als Startargument im Format \"patid<Pat.-Id>\" ausgeführt werden.", QMessageBox.StandardButton.Ok)
+            mb.exec() 
+        ## /Nur mit Lizenz
         
         jahr = datetime.datetime.now().year
         copyrightJahre = "2023"
@@ -358,6 +380,11 @@ class MainWindow(QMainWindow):
             elif self.pdferstellen and self.bmiuebernehmen:
                 mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Körpergröße und -gewicht wurden nicht vom Praxisverwaltungssystem übermittelt. Der BMI kann daher für die PDF-Dateierstellung nicht berechnent werden.", QMessageBox.StandardButton.Ok)
                 mb.exec()
+            ## Nur mit Lizenz
+            if self.pseudoLizenzId != "":
+                self.patId = self.pseudoLizenzId
+                logger.logger.info("PatId wegen Pseudolizenz auf " + self.pseudoLizenzId + " gesetzt")
+            ## /Nur mit Lizenz
         except (IOError, gdtzeile.GdtFehlerException) as e:
             logger.logger.warning("Fehler beim Laden der GDT-Datei: " + str(e))
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis von GeriGDT", "Fehler beim Laden der GDT-Datei:\n" + str(e) + "\n\nDieser Fehler hat in der Regel eine der folgenden Ursachen:\n- Die im PVS und in GeriGDT konfigurierten GDT-Austauschverzeichnisse stimmen nicht überein.\n- GeriGDT wurde nicht aus dem PVS heraus gestartet, so dass keine vom PVS erzeugte GDT-Datei gefunden werden konnte.\n\nSoll GeriGDT dennoch geöffnet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -369,6 +396,8 @@ class MainWindow(QMainWindow):
             self.widget = QWidget()
             self.widget.installEventFilter(self)
             mainLayout = QVBoxLayout()
+            self.labelPseudolizenz = QLabel("+++ Pseudolizenz für Test-/ Präsentationszwecke +++")
+            self.labelPseudolizenz.setStyleSheet("color:rgb(200,0,0);font-style:italic")
             kopfLayout = QHBoxLayout()
             kopfLayout.setAlignment(Qt.AlignmentFlag.AlignRight)
             titelLabel = QLabel("Geriatrisches Basisassessment")
@@ -666,6 +695,7 @@ class MainWindow(QMainWindow):
             datenLayoutG.addWidget(self.dokuvonComboBox, 3, 1)
             self.pushbuttonDatenSenden = QPushButton("Daten senden")
             self.pushbuttonDatenSenden.setFixedSize(QSize(160, 80))
+            self.pushbuttonDatenSenden.setEnabled(self.addOnsFreigeschaltet)
             if self.patId == "-":
                 self.pushbuttonDatenSenden.setEnabled(False)
                 self.pushbuttonDatenSenden.setToolTip("Senden nicht möglich, da keine GDT-Datei vom PVS geladen")
@@ -674,8 +704,23 @@ class MainWindow(QMainWindow):
             datenLayoutH.addSpacing(20)
             datenLayoutH.addWidget(self.pushbuttonDatenSenden)
             testLayout.addLayout(datenLayoutH, 5, 2)
+            ## Nur mit Lizenz
+            if self.addOnsFreigeschaltet and gdttoolsL.GdtToolsLizenzschluessel.getSoftwareId(self.lizenzschluessel) == gdttoolsL.SoftwareId.GERIGDTPSEUDO:
+                mainLayout.addWidget(self.labelPseudolizenz, alignment=Qt.AlignmentFlag.AlignCenter)
+            ## /Nur mit Lizenz
             mainLayout.addLayout(kopfLayout)
             mainLayout.addLayout(testLayout)
+            ## Nur mit Lizenz
+            if self.addOnsFreigeschaltet:
+                gueltigeLizenztage = gdttoolsL.GdtToolsLizenzschluessel.nochTageGueltig(self.lizenzschluessel)
+                if gueltigeLizenztage  > 0 and gueltigeLizenztage <= 30:
+                    labelLizenzLaeuftAus = QLabel("Die genutzte Lizenz ist noch " + str(gueltigeLizenztage) + " Tage gültig.")
+                    labelLizenzLaeuftAus.setStyleSheet("color:rgb(200,0,0)")
+                    mainLayout.addWidget(labelLizenzLaeuftAus, alignment=Qt.AlignmentFlag.AlignCenter)
+            else:
+                self.pushbuttonDatenSenden.setEnabled(False)
+                self.pushbuttonDatenSenden.setText("Keine gültige Lizenz")
+            ## /Nur mit Lizenz
             self.widget.setLayout(mainLayout)
 
             self.setCentralWidget(self.widget)
@@ -701,6 +746,7 @@ class MainWindow(QMainWindow):
             einstellungenBenutzerAction = QAction("BenutzerInnen verwalten", self)
             einstellungenBenutzerAction.triggered.connect(lambda checked = False, neustartfrage = True: self.einstellungenBenutzer(checked, neustartfrage)) 
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
+            ## Nur mit Lizenz           
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
             einstellungenErweiterungenAction.triggered.connect(lambda checked = False, neustartfrage = True: self.einstellungenLanrLizenzschluessel(checkbox, neustartfrage)) 
             einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
@@ -708,6 +754,7 @@ class MainWindow(QMainWindow):
             einstellungenImportExportAction.triggered.connect(self.einstellungenImportExport) 
             einstellungenImportExportAction.setShortcut(QKeySequence("Ctrl+I"))
             einstellungenImportExportAction.setMenuRole(QAction.MenuRole.NoRole)
+            ## /Nur mit Lizenz
             hilfeMenu = menubar.addMenu("Hilfe")
             hilfeWikiAction = QAction("GeriGDT Wiki", self)
             hilfeWikiAction.triggered.connect(self.gerigdtWiki) 
@@ -734,8 +781,10 @@ class MainWindow(QMainWindow):
             einstellungenMenu.addAction(einstellungenAllgemeinAction)
             einstellungenMenu.addAction(einstellungenGdtAction)
             einstellungenMenu.addAction(einstellungenBenutzerAction)
+            ## Nur mit Lizenz
             einstellungenMenu.addAction(einstellungenErweiterungenAction)
             einstellungenMenu.addAction(einstellungenImportExportAction)
+            ## /Nur mit Lizenz
             hilfeMenu.addAction(hilfeWikiAction)
             hilfeMenu.addSeparator()
             hilfeMenu.addAction(hilfeUpdateAction)
@@ -1033,6 +1082,7 @@ class MainWindow(QMainWindow):
                 if mb.exec() == QMessageBox.StandardButton.Yes:
                     os.execl(sys.executable, __file__, *sys.argv)
 
+    ## Nur mit Lizenz
     def einstellungenLanrLizenzschluessel(self, checked, neustartfrage):
         de = dialogEinstellungenLanrLizenzschluessel.EinstellungenProgrammerweiterungen(self.configPath)
         if de.exec() == 1:
@@ -1052,6 +1102,7 @@ class MainWindow(QMainWindow):
         de = dialogEinstellungenImportExport.EinstellungenImportExport(self.configPath)
         if de.exec() == 1:
             pass
+    ## /Nur mit Lizenz
     
     def gerigdtWiki(self, link):
         QDesktopServices.openUrl("https://github.com/retconx/gerigdt/wiki")

@@ -1,10 +1,12 @@
-import configparser, os, sys, gdttoolsL, datetime, logger
+import configparser, os, sys, datetime
+## Nur mit Lizenz
+import gdttoolsL
+## /import
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
     QVBoxLayout,
     QGroupBox,
-    QLabel,
     QCheckBox,
     QFileDialog,
     QRadioButton,
@@ -28,10 +30,12 @@ class EinstellungenImportExport(QDialog):
         self.buttonBox.accepted.connect(self.accept) # type: ignore
         self.buttonBox.rejected.connect(self.reject) # type: ignore
 
+        ## Nur mit Lizenz#
         # Prüfen, ob Lizenzschlüssel verschlüsselt in config.ini
         lizenzschluessel = self.configIni["Erweiterungen"]["lizenzschluessel"]
         if len(lizenzschluessel) != 29:
             lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(lizenzschluessel)
+        ## /Nur mit Lizenz#
 
         mainLayoutV = QVBoxLayout()
         

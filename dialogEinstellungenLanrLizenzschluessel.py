@@ -1,5 +1,7 @@
 import configparser, os, re
+## Nur mit Lizenz
 import gdttoolsL
+## /Nur mit Lizenz
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -63,7 +65,7 @@ class EinstellungenProgrammerweiterungen(QDialog):
             mb.exec()
             self.lineEditLanr.setFocus()
             self.lineEditLanr.selectAll()
-        elif re.match(reLizenzschluessel, self.lineEditLizenzschluessel.text()) == None or not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT):
+        elif re.match(reLizenzschluessel, self.lineEditLizenzschluessel.text()) == None or (not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDT) and not gdttoolsL.GdtToolsLizenzschluessel.lizenzErteilt(self.lineEditLizenzschluessel.text().upper(), self.lineEditLanr.text(), gdttoolsL.SoftwareId.GERIGDTPSEUDO)):
             mb = QMessageBox(QMessageBox.Icon.Information, "Hinweis", "Die LANR/Lizenzschlüssel-Kombination ist ungültig.", QMessageBox.StandardButton.Ok)
             mb.exec()
             self.lineEditLizenzschluessel.setFocus()
