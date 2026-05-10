@@ -104,7 +104,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(left, top, mainwindowBreite, mainwindowHoehe)
 
     # Statusmeldungen ändern
-    def changeStatus(self, statusnummer:int, statustext:str, rot = False, gruen = False):
+    def changeStatus(self, statusnummer:int, statustext:str, rot:bool, gruen:bool):
         """
             Ändert eine Statusmeldung
             Parameter:
@@ -120,7 +120,6 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.maxBenutzerzahl = 20
 
         # config.ini lesen
         ersterStart = False
@@ -430,9 +429,9 @@ class MainWindow(QMainWindow):
             kopfLayout.addStretch()
             kopfLayout.addWidget(groupboxStatusanzeige)
             if self.patId !="-":
-                self.changeStatus(0, "geladen")
+                self.changeStatus(0, "geladen", False, False)
             else:
-                self.changeStatus(0, "nicht geladen", True)
+                self.changeStatus(0, "nicht geladen", True, False)
             testLayout = QGridLayout()
             barthelLabel = QLabel(text="Barthel-Index")
             barthelLabel.setFont(fontBoldGross)
@@ -818,7 +817,7 @@ class MainWindow(QMainWindow):
         return False
 
     def mitVorherigerUntersuchungAusfuellen(self):
-        pfad = self.dokuVerzeichnis + os.sep+ self.patId
+        pfad = self.dokuVerzeichnis + os.sep + self.patId
         doku = ""
         if os.path.exists(self.dokuVerzeichnis):
             if os.path.exists(pfad) and len(os.listdir(pfad)) > 0:
@@ -857,7 +856,7 @@ class MainWindow(QMainWindow):
         if doku != "" and self.addOnsFreigeschaltet:
             # Untersuchungsdatum
             untdat = self.dokuZusammenfassungLesen(doku)[0]
-            self.changeStatus(1, untdat.toString("dd.MM.yyyy"), gruen=True)
+            self.changeStatus(1, untdat.toString("dd.MM.yyyy"), False, True)
             self.buttonAlteUntersuchung.setEnabled(True)
             self.buttonAlteUntersuchung.setToolTip("Vorheriges Untersuchungsergebnis wiederherstellen")
             # Barthel ausfüllen
@@ -891,7 +890,7 @@ class MainWindow(QMainWindow):
             self.checkboxVerfuegungen[1].setChecked(vf & 0b010 == 0b010)
             self.checkboxVerfuegungen[2].setChecked(vf & 0b100 == 0b100)
         else:
-            self.changeStatus(1, "-")
+            self.changeStatus(1, "-", False, False)
             self.buttonAlteUntersuchung.setEnabled(False)
             self.buttonAlteUntersuchung.setToolTip("Funktion nicht verfügbar")
 
@@ -1066,7 +1065,7 @@ class MainWindow(QMainWindow):
             self.configIni["Benutzer"]["einrichtung"] = de.lineEditEinrichtungsname.text()
             namen = []
             kuerzel = []
-            for i in range(self.maxBenutzerzahl):
+            for i in range(de.anzahlBenutzerzeilen):
                 if de.lineEditNamen[i].text() != "":
                     namen.append(de.lineEditNamen[i].text())
                     kuerzel.append(de.lineEditKuerzel[i].text())

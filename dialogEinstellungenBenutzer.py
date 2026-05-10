@@ -1,5 +1,5 @@
 import configparser, os
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDialog,
@@ -8,12 +8,14 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QScrollArea,
+    QWidget,
+    QPushButton
 )
 
 class EinstellungenBenutzer(QDialog):
     def __init__(self, configPath):
         super().__init__()
-        self.maxBenutzerzahl = 20
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
@@ -21,6 +23,9 @@ class EinstellungenBenutzer(QDialog):
         self.einrichtungsname = configIni["Benutzer"]["einrichtung"]
         self.benutzernamen = (configIni["Benutzer"]["namen"]).split("::")
         self.benutzerkuerzel = (configIni["Benutzer"]["kuerzel"]).split("::")
+        self.anzahlBenutzerzeilen = len(self.benutzernamen) + 1
+        if self.anzahlBenutzerzeilen < 11:
+            self.anzahlBenutzerzeilen = 11
 
         self.setWindowTitle("BenutzerInnen verwalten")
         self.setMinimumSize(QSize(300,250))
@@ -30,7 +35,9 @@ class EinstellungenBenutzer(QDialog):
         self.buttonBox.rejected.connect(self.reject) # type: ignore
 
         dialogLayoutV = QVBoxLayout()
-        dialogLayoutG = QGridLayout()
+        self.dialogLayoutG = QGridLayout()
+        self.scrollArea = QScrollArea()
+        scrollWidget = QWidget()
 
         labelEinrichtungsname = QLabel("Name der Einrichtung")
         self.lineEditEinrichtungsname = QLineEdit(self.einrichtungsname)
@@ -38,37 +45,66 @@ class EinstellungenBenutzer(QDialog):
         dialogLayoutV.addWidget(labelEinrichtungsname)
         dialogLayoutV.addWidget(self.lineEditEinrichtungsname)
         
+        self.labelNummern = QLabel("Nr.")
         self.labelNamen = QLabel("Name")
         self.labelKuerzel = QLabel("Kürzel")
-        dialogLayoutG.addWidget(self.labelNamen, 0, 0)
-        dialogLayoutG.addWidget(self.labelKuerzel, 0, 1)
+        self.dialogLayoutG.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.dialogLayoutG.addWidget(self.labelNummern, 0, 0)
+        self.dialogLayoutG.addWidget(self.labelNamen, 0, 1)
+        self.dialogLayoutG.addWidget(self.labelKuerzel, 0, 2)
+        self.labelBenutzerNummer = []
         self.lineEditNamen = []
         self.lineEditKuerzel = []
-        for i in range(self.maxBenutzerzahl):
+        for i in range(self.anzahlBenutzerzeilen):
+            self.labelBenutzerNummer.append(QLabel(str(i + 1)))
+            self.dialogLayoutG.addWidget(self.labelBenutzerNummer[i], i + 1, 0)
             self.lineEditNamen.append(QLineEdit())
-            dialogLayoutG.addWidget(self.lineEditNamen[i], i + 1, 0)
+            self.lineEditNamen[i].setFixedWidth(250)
+            self.dialogLayoutG.addWidget(self.lineEditNamen[i], i + 1, 1)
             self.lineEditKuerzel.append(QLineEdit())
             self.lineEditKuerzel[i].setFixedWidth(40)
-            dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 1)
+            self.dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 2)
         self.lineEditNamen[0].setPlaceholderText("Dr. med. XY")
-        # for i in range(self.maxBenutzerzahl):
-        #     self.lineEditKuerzel.append(QLineEdit())
-        #     self.lineEditKuerzel[i].setFixedWidth(40)
-        #     dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 1)
         for i in range(len(self.benutzernamen)):
                 self.lineEditNamen[i].setText(self.benutzernamen[i])
                 self.lineEditKuerzel[i].setText(self.benutzerkuerzel[i])
 
-        dialogLayoutV.addLayout(dialogLayoutG)
+        scrollWidget.setLayout(self.dialogLayoutG)
+        self.scrollArea.setWidget(scrollWidget)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.verticalScrollBar().rangeChanged.connect(self.verticalScrollBarRangeChanged)
+        
+        # Hinzufügen-Button
+        self.pushButtonBenutzerHinzufuegen = QPushButton("BenutzerIn hinzufügen")
+        self.pushButtonBenutzerHinzufuegen.clicked.connect(self.pushButtonBenutzerHinzufuegenClicked)
+
+        dialogLayoutV.addWidget(self.scrollArea)
+        dialogLayoutV.addWidget(self.pushButtonBenutzerHinzufuegen)
         dialogLayoutV.addWidget(self.buttonBox)
 
         self.setLayout(dialogLayoutV)
+        self.setFixedHeight(int(self.dialogLayoutG.sizeHint().height()) + 180)
         self.lineEditNamen[0].setFocus()
         self.lineEditNamen[0].setFocus()
+    
+    def pushButtonBenutzerHinzufuegenClicked(self):
+        self.labelBenutzerNummer.append(QLabel(str(self.anzahlBenutzerzeilen + 1)))
+        self.lineEditNamen.append(QLineEdit())
+        self.lineEditKuerzel.append(QLineEdit())
+        self.dialogLayoutG.addWidget(self.labelBenutzerNummer[self.anzahlBenutzerzeilen], self.anzahlBenutzerzeilen + 2, 0)
+        self.dialogLayoutG.addWidget(self.lineEditNamen[self.anzahlBenutzerzeilen], self.anzahlBenutzerzeilen + 2, 1)
+        self.lineEditNamen[self.anzahlBenutzerzeilen].setFixedWidth(250)
+        self.dialogLayoutG.addWidget(self.lineEditKuerzel[self.anzahlBenutzerzeilen], self.anzahlBenutzerzeilen + 2, 2)
+        self.lineEditKuerzel[self.anzahlBenutzerzeilen].setFixedWidth(40)
+        self.lineEditNamen[self.anzahlBenutzerzeilen].setFocus()
+        self.anzahlBenutzerzeilen += 1
+    
+    def verticalScrollBarRangeChanged(self):
+        self.scrollArea.verticalScrollBar().setValue(self.scrollArea.verticalScrollBar().maximum())
    
     def accept(self):
         fehlendesKuerzel = -1
-        for i in range(self.maxBenutzerzahl):
+        for i in range(self.anzahlBenutzerzeilen):
             if self.lineEditNamen[i].text() != "" and self.lineEditKuerzel[i].text() == "":
                 fehlendesKuerzel = i
                 break
