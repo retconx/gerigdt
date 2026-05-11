@@ -55,6 +55,8 @@ class EinstellungenBenutzer(QDialog):
         self.labelBenutzerNummer = []
         self.lineEditNamen = []
         self.lineEditKuerzel = []
+        self.pushButtonEntfernen = []
+        self.pushButtonWiederherstellen = []
         for i in range(self.anzahlBenutzerzeilen):
             self.labelBenutzerNummer.append(QLabel(str(i + 1)))
             self.dialogLayoutG.addWidget(self.labelBenutzerNummer[i], i + 1, 0)
@@ -64,10 +66,16 @@ class EinstellungenBenutzer(QDialog):
             self.lineEditKuerzel.append(QLineEdit())
             self.lineEditKuerzel[i].setFixedWidth(40)
             self.dialogLayoutG.addWidget(self.lineEditKuerzel[i], i + 1, 2)
+            self.pushButtonEntfernen.append(QPushButton("\u232b"))
+            self.pushButtonEntfernen[i].setFixedWidth(30)
+            self.pushButtonEntfernen[i].clicked.connect(lambda clicked = False, benutzerNr = i:self.pushButtonEntfernenClicked(clicked, benutzerNr))
+            self.dialogLayoutG.addWidget(self.pushButtonEntfernen[i], i + 1, 3)
         self.lineEditNamen[0].setPlaceholderText("Dr. med. XY")
         for i in range(len(self.benutzernamen)):
                 self.lineEditNamen[i].setText(self.benutzernamen[i])
                 self.lineEditKuerzel[i].setText(self.benutzerkuerzel[i])
+                if self.lineEditNamen[i].text() != "":
+                    self.pushButtonEntfernen[i].setToolTip("BenutzerIn " + str(i + 1) + " " + self.lineEditNamen[i].text() + " (" + self.lineEditKuerzel[i].text() + ") entfernen")
 
         scrollWidget.setLayout(self.dialogLayoutG)
         self.scrollArea.setWidget(scrollWidget)
@@ -98,6 +106,10 @@ class EinstellungenBenutzer(QDialog):
         self.lineEditKuerzel[self.anzahlBenutzerzeilen].setFixedWidth(40)
         self.lineEditNamen[self.anzahlBenutzerzeilen].setFocus()
         self.anzahlBenutzerzeilen += 1
+
+    def pushButtonEntfernenClicked(self, clicked, nr):
+        self.lineEditNamen[nr].setText("")
+        self.lineEditKuerzel[nr].setText("")
     
     def verticalScrollBarRangeChanged(self):
         self.scrollArea.verticalScrollBar().setValue(self.scrollArea.verticalScrollBar().maximum())
