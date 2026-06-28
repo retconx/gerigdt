@@ -22,7 +22,7 @@ class EinstellungenGdt(QDialog):
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
-        configIni.read(os.path.join(configPath, "config.ini"))
+        configIni.read(os.path.join(configPath, "config.ini"), encoding="utf-8")
         self.gdtImportVerzeichnis = configIni["GDT"]["gdtimportverzeichnis"]
         if self.gdtImportVerzeichnis == "":
             self.gdtImportVerzeichnis = os.getcwd()

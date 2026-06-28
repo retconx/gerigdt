@@ -21,7 +21,7 @@ class EinstellungenImportExport(QDialog):
 
         #config.ini lesen
         self.configIni = configparser.ConfigParser()
-        self.configIni.read(os.path.join(configPath, "config.ini"))
+        self.configIni.read(os.path.join(configPath, "config.ini"), encoding="utf-8")
 
         self.setWindowTitle("Einstellungen im-/ exportieren")
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -118,7 +118,7 @@ class EinstellungenImportExport(QDialog):
                                 self.configIni[section][option] = configImport.get(section, option)
                         i += 1
                     try:
-                        with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                        with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                             self.configIni.write(configfile)
                         self.done(1)
                         mb = QMessageBox(QMessageBox.Icon.Warning, "Hinweis von GeriGDT", "Die Einstellungen wurden erfolgreich importiert. Damit diese wirksam werden, muss GeriGDT neu gestartet werden.\nSoll GeriGDT neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)

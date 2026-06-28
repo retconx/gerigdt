@@ -25,7 +25,7 @@ class EinstellungenAllgemein(QDialog):
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
-        configIni.read(os.path.join(configPath, "config.ini"))
+        configIni.read(os.path.join(configPath, "config.ini"), encoding="utf-8")
         self.version = configIni["Allgemein"]["version"]
         self.releasedatum = configIni["Allgemein"]["releasedatum"]
         self.dokuverzeichnis = configIni["Allgemein"]["dokuverzeichnis"]
@@ -34,6 +34,7 @@ class EinstellungenAllgemein(QDialog):
         self.bmiuebernehmen = configIni["Allgemein"]["bmiuebernehmen"] == "1"
         self.pdfbezeichnung = configIni["Allgemein"]["pdfbezeichnung"] 
         self.benutzerUebernehmen = configIni["Allgemein"]["benutzeruebernehmen"] == "1"
+        self.einrichtungsname = configIni["Benutzer"]["einrichtung"]
         self.einrichtungUebernehmen = configIni["Allgemein"]["einrichtunguebernehmen"] == "1"
         self.autoupdate = configIni["Allgemein"]["autoupdate"] == "True"
         self.updaterpfad = configIni["Allgemein"]["updaterpfad"]
@@ -51,6 +52,24 @@ class EinstellungenAllgemein(QDialog):
             lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(lizenzschluessel)
 
         dialogLayoutV = QVBoxLayout()
+        # Groupbox Einrichtung
+        groupBoxEinrichtungLayoutG = QGridLayout()
+        groupBoxEinrichtung = QGroupBox("Einrichtung/Praxis")
+        groupBoxEinrichtung.setFont(self.fontBold)
+        labelEinrichtungsname = QLabel("Name")
+        labelEinrichtungsname.setFont(self.fontNormal)
+        self.lineEditEinrichtungsname = QLineEdit(self.einrichtungsname)
+        self.lineEditEinrichtungsname.setFont(self.fontNormal)
+        self.lineEditEinrichtungsname.setPlaceholderText("Hausarztpraxis XY")
+        self.checkBoxEinrichtungUebernehmen1 = QCheckBox("Auf PDF übernehmen")
+        self.checkBoxEinrichtungUebernehmen1.setFont(self.fontNormal)
+        self.checkBoxEinrichtungUebernehmen1.setChecked(self.einrichtungUebernehmen)
+        self.checkBoxEinrichtungUebernehmen1.stateChanged.connect(self.checkBoxEinrichtungUebernehmen1Changed)
+        groupBoxEinrichtungLayoutG.addWidget(labelEinrichtungsname, 0, 0)
+        groupBoxEinrichtungLayoutG.addWidget(self.lineEditEinrichtungsname, 0, 1)
+        groupBoxEinrichtungLayoutG.addWidget(self.checkBoxEinrichtungUebernehmen1, 1, 0, 1, 2)
+        groupBoxEinrichtung.setLayout(groupBoxEinrichtungLayoutG)
+
         # Groupbox Dokumentationsverwaltung
         groupboxDokumentationsverwaltung = QGroupBox("Dokumentationsverwaltung")
         groupboxDokumentationsverwaltung.setFont(self.fontBold)
@@ -96,17 +115,17 @@ class EinstellungenAllgemein(QDialog):
         labelBmiUebernehmen.setFont(self.fontNormal)
         self.checkboxBmiUebernehmen = QCheckBox()
         self.checkboxBmiUebernehmen.setChecked(self.bmiuebernehmen)
-        self.checkboxBmiUebernehmen.stateChanged.connect(self.checkboxBmiUebernehmenChanged) # type: ignore
+        self.checkboxBmiUebernehmen.stateChanged.connect(self.checkboxBmiUebernehmenChanged)
         labelBenutzerUebernehmen = QLabel("Benutzername übernehmen")
         labelBenutzerUebernehmen.setFont(self.fontNormal)
         labelEinrichtungUebernehmen = QLabel("Einrichtungsname übernehmen")
         labelEinrichtungUebernehmen.setFont(self.fontNormal)
         self.checkboxBenutzerUebernehmen = QCheckBox()
         self.checkboxBenutzerUebernehmen.setChecked(self.benutzerUebernehmen)
-        self.checkboxBenutzerUebernehmen.stateChanged.connect(self.checkboxBenutzerUebernehmenChanged) # type: ignore
-        self.checkboxEinrichtungUebernehmen = QCheckBox()
-        self.checkboxEinrichtungUebernehmen.setChecked(self.einrichtungUebernehmen)
-        self.checkboxEinrichtungUebernehmen.stateChanged.connect(self.checkboxEinrichtungUebernehmenChanged) # type: ignore
+        self.checkboxBenutzerUebernehmen.stateChanged.connect(self.checkboxBenutzerUebernehmenChanged)
+        self.checkBoxEinrichtungUebernehmen2 = QCheckBox()
+        self.checkBoxEinrichtungUebernehmen2.setChecked(self.einrichtungUebernehmen)
+        self.checkBoxEinrichtungUebernehmen2.stateChanged.connect(self.checkBoxEinrichtungUebernehmen2Changed)
         labelPdfBezeichnung = QLabel("PDF-Bezeichnung in Karteikarte:")
         labelPdfBezeichnung.setFont(self.fontNormal)
         self.lineEditPdfBezeichnung = QLineEdit(self.pdfbezeichnung)
@@ -132,7 +151,7 @@ class EinstellungenAllgemein(QDialog):
         groupboxLayoutPdfErstellung.addWidget(labelBenutzerUebernehmen, 3, 0)
         groupboxLayoutPdfErstellung.addWidget(self.checkboxBenutzerUebernehmen, 3, 1)
         groupboxLayoutPdfErstellung.addWidget(labelEinrichtungUebernehmen, 4, 0)
-        groupboxLayoutPdfErstellung.addWidget(self.checkboxEinrichtungUebernehmen, 4, 1)
+        groupboxLayoutPdfErstellung.addWidget(self.checkBoxEinrichtungUebernehmen2, 4, 1)
         groupboxPdfErstellung.setLayout(groupboxLayoutPdfErstellung)
         groupboxLayoutPdfErstellung.addWidget(labelPdfBezeichnung, 5, 0)
         groupboxLayoutPdfErstellung.addWidget(self.lineEditPdfBezeichnung, 6, 0)
@@ -182,6 +201,7 @@ class EinstellungenAllgemein(QDialog):
         groupBoxUpdatesLayoutG.addWidget(self.checkBoxAutoUpdate, 1, 0, 1, 3)
         groupBoxUpdates.setLayout(groupBoxUpdatesLayoutG)
 
+        dialogLayoutV.addWidget(groupBoxEinrichtung)
         dialogLayoutV.addWidget(groupboxDokumentationsverwaltung)
         dialogLayoutV.addWidget(groupboxPdfErstellung)
         dialogLayoutV.addWidget(groupboxTrendanzeige)
@@ -209,7 +229,8 @@ class EinstellungenAllgemein(QDialog):
             self.checkboxBmiUebernehmen.setChecked(False)
             self.lineEditPdfBezeichnung.setText("")
             self.checkboxBenutzerUebernehmen.setChecked(False)
-            self.checkboxEinrichtungUebernehmen.setChecked(False)
+            self.checkBoxEinrichtungUebernehmen1.setChecked(False)
+            self.checkBoxEinrichtungUebernehmen2.setChecked(False)
 
     def checkboxBmiUebernehmenChanged(self, newState):
         if newState:
@@ -218,9 +239,16 @@ class EinstellungenAllgemein(QDialog):
     def checkboxBenutzerUebernehmenChanged(self, newState):
         if newState:
             self.checkboxPdfErstellen.setChecked(True)
-    def checkboxEinrichtungUebernehmenChanged(self, newState):
+
+    def checkBoxEinrichtungUebernehmen1Changed(self, newState):
         if newState:
             self.checkboxPdfErstellen.setChecked(True)
+        self.checkBoxEinrichtungUebernehmen2.setChecked(newState)
+
+    def checkBoxEinrichtungUebernehmen2Changed(self, newState):
+        if newState:
+            self.checkboxPdfErstellen.setChecked(True)
+        self.checkBoxEinrichtungUebernehmen1.setChecked(newState)
 
     def pushButtonTrendverzeichnisClicked(self):
         fd = QFileDialog(self)

@@ -7,7 +7,7 @@ import dialogUeberGeriGdt, dialogEinstellungenGdt, dialogEinstellungenBenutzer, 
 import geriasspdf
 import class_trends
 from PySide6.QtCore import Qt, QSize, QDate, QTime, QTranslator, QLibraryInfo, QEvent
-from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices, QKeyEvent
+from PySide6.QtGui import QFont, QAction, QKeySequence, QIcon, QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -69,8 +69,8 @@ def versionVeraltet(versionAktuell:str, versionVergleich:str):
 # Sicherstellen, dass Icon in Windows angezeigt wird
 try:
     from ctypes import windll # type: ignore
-    mayappid = "gdttools.gerigdt"
-    windll.shell32.SetCurrentProcessExplicitAppUserModelID(mayappid)
+    myappid = "gdttools.gerigdt"
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
     pass
 
@@ -133,15 +133,15 @@ class MainWindow(QMainWindow):
         self.configPath = updateSafePath
         self.configIni = configparser.ConfigParser()
         if os.path.exists(os.path.join(updateSafePath, "config.ini")):
-            logger.logger.info("config.ini in " + updateSafePath + " exisitert")
+            logger.logger.info("config.ini in " + updateSafePath + " existert")
             self.configPath = updateSafePath
         elif os.path.exists(os.path.join(basedir, "config.ini")):
-            logger.logger.info("config.ini in " + updateSafePath + " exisitert nicht")
+            logger.logger.info("config.ini in " + updateSafePath + " existert nicht")
             try:
                 if (not os.path.exists(updateSafePath)):
-                    logger.logger.info(updateSafePath + " exisitert nicht")
+                    logger.logger.info(updateSafePath + " existert nicht")
                     os.makedirs(updateSafePath, 0o777)
-                    logger.logger.info(updateSafePath + "erzeugt")
+                    logger.logger.info(updateSafePath + " erzeugt")
                 shutil.copy(os.path.join(basedir, "config.ini"), updateSafePath)
                 logger.logger.info("config.ini von " + basedir + " nach " + updateSafePath + " kopiert")
                 self.configPath = updateSafePath
@@ -156,7 +156,23 @@ class MainWindow(QMainWindow):
             mb = QMessageBox(QMessageBox.Icon.Critical, "Hinweis von GeriGDT", "Die Konfigurationsdatei config.ini fehlt. GeriGDT kann nicht gestartet werden.", QMessageBox.StandardButton.Ok)
             mb.exec()
             sys.exit()
-        self.configIni.read(os.path.join(self.configPath, "config.ini"))
+        # config.ini ggf. in utf-8 wandeln ab 3.14.2
+        try:
+            self.configIni.read(os.path.join(self.configPath, "config.ini"), encoding="utf-8")
+        except UnicodeDecodeError as e:
+            logger.logger.error("Unicode Decode Error beim Laden der config.ini mit utf-8")
+            try:
+                self.configIni.read(os.path.join(self.configPath, "config.ini"))
+            except UnicodeDecodeError as e:
+                logger.logger.error("Unicode Decode Error beim Laden der config.ini mit Standard-Encoding")
+                try:
+                    self.configIni.read(os.path.join(self.configPath, "config.ini"), encoding="cp1252")
+                except UnicodeDecodeError as e:
+                    logger.logger.error("Unicode Decode Error beim Laden der config.ini mit cp1252")
+            with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
+                    self.configIni.write(configfile)
+            logger.logger.info("config.ini mit utf-8 gespeichert")
+
         self.gdtImportVerzeichnis = self.configIni["GDT"]["gdtimportverzeichnis"]
         self.gdtExportVerzeichnis = self.configIni["GDT"]["gdtexportverzeichnis"]
         self.kuerzelgerigdt = self.configIni["GDT"]["kuerzelgerigdt"]
@@ -168,7 +184,7 @@ class MainWindow(QMainWindow):
         self.dokuVerzeichnis = self.configIni["Allgemein"]["dokuverzeichnis"]
         self.vorherigeDokuLaden = (self.configIni["Allgemein"]["vorherigedokuladen"] == "1")
 
-        # Nachträglich hinzufefügte Options
+        # Nachträglich hinzugefügte Options
         # 3.10.2
         self.eulagelesen = False
         if self.configIni.has_option("Allgemein", "eulagelesen"):
@@ -205,7 +221,7 @@ class MainWindow(QMainWindow):
         self.trendverzeichnis = ""
         if self.configIni.has_option("Allgemein", "trendverzeichnis"):
             self.trendverzeichnis = self.configIni["Allgemein"]["trendverzeichnis"]
-        # /Nachträglich hinzufefügte Options
+        # /Nachträglich hinzugefügte Options
 
         z = self.configIni["GDT"]["zeichensatz"]
         self.zeichensatz = gdt.GdtZeichensatz.IBM_CP437
@@ -221,7 +237,7 @@ class MainWindow(QMainWindow):
         if len(self.lizenzschluessel) == 29:
             logger.logger.info("Lizenzschlüssel unverschlüsselt")
             self.configIni["Erweiterungen"]["lizenzschluessel"] = gdttoolsL.GdtToolsLizenzschluessel.krypt(self.lizenzschluessel)
-            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                     self.configIni.write(configfile)
         else:
             self.lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(self.lizenzschluessel)
@@ -234,7 +250,7 @@ class MainWindow(QMainWindow):
             if de.checkBoxZustimmung.isChecked():
                 self.eulagelesen = True
                 self.configIni["Allgemein"]["eulagelesen"] = "True"
-                with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                     self.configIni.write(configfile)
                 logger.logger.info("EULA zugestimmt")
             else:
@@ -261,7 +277,7 @@ class MainWindow(QMainWindow):
         # Version vergleichen und gegebenenfalls aktualisieren
         configIniBase = configparser.ConfigParser()
         try:
-            configIniBase.read(os.path.join(basedir, "config.ini"))
+            configIniBase.read(os.path.join(basedir, "config.ini"), encoding="utf-8")
             if versionVeraltet(self.version, configIniBase["Allgemein"]["version"]):
                 # Version aktualisieren
                 self.configIni["Allgemein"]["version"] = configIniBase["Allgemein"]["version"]
@@ -292,7 +308,7 @@ class MainWindow(QMainWindow):
                     self.configIni["Allgemein"]["trendverzeichnis"] = ""
                 # /config.ini aktualisieren
 
-                with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                     self.configIni.write(configfile)
                 self.version = self.configIni["Allgemein"]["version"]
                 logger.logger.info("Version auf " + self.version + " aktualisiert")
@@ -301,7 +317,7 @@ class MainWindow(QMainWindow):
                 de.exec()
                 self.eulagelesen = de.checkBoxZustimmung.isChecked()
                 self.configIni["Allgemein"]["eulagelesen"] = str(self.eulagelesen)
-                with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+                with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                     self.configIni.write(configfile)
                 if self.eulagelesen:
                     logger.logger.info("EULA zugestimmt")
@@ -976,7 +992,7 @@ class MainWindow(QMainWindow):
     def autoUpdatePruefung(self, checked):
         self.autoupdate = checked
         self.configIni["Allgemein"]["autoupdate"] = str(checked)
-        with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+        with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
             self.configIni.write(configfile)
 
     def ueberGeriGdt(self):
@@ -1009,6 +1025,7 @@ class MainWindow(QMainWindow):
     def einstellungenAllgemein(self, checked, neustartfrage):
         de = dialogEinstellungenAllgemein.EinstellungenAllgemein(self.configPath)
         if de.exec() == 1:
+            self.configIni["Benutzer"]["einrichtung"] = de.lineEditEinrichtungsname.text()
             self.configIni["Allgemein"]["dokuverzeichnis"] = de.lineEditArchivierungsverzeichnis.text()
             self.configIni["Allgemein"]["vorherigedokuladen"] = "0"
             if de.checkboxVorherigeDokuLaden.isChecked():
@@ -1024,12 +1041,12 @@ class MainWindow(QMainWindow):
             if de.checkboxBenutzerUebernehmen.isChecked():
                 self.configIni["Allgemein"]["benutzeruebernehmen"] = "1"
             self.configIni["Allgemein"]["einrichtunguebernehmen"] = "0"
-            if de.checkboxEinrichtungUebernehmen.isChecked():
+            if de.checkBoxEinrichtungUebernehmen2.isChecked():
                 self.configIni["Allgemein"]["einrichtunguebernehmen"] = "1"
             self.configIni["Allgemein"]["updaterpfad"] = de.lineEditUpdaterPfad.text()
             self.configIni["Allgemein"]["autoupdate"] = str(de.checkBoxAutoUpdate.isChecked())
             self.configIni["Allgemein"]["trendverzeichnis"] = de.lineEditTrendverzeichnis.text()
-            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT neu gestartet werden.\nSoll GeriGDT jetzt neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -1049,7 +1066,7 @@ class MainWindow(QMainWindow):
             self.configIni["GDT"]["kuerzelgerigdt"] = de.lineEditGeriGdtKuerzel.text()
             self.configIni["GDT"]["kuerzelpraxisedv"] = de.lineEditPraxisEdvKuerzel.text()
             self.configIni["GDT"]["zeichensatz"] = str(de.aktuelleZeichensatznummer + 1)
-            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT neu gestartet werden.\nSoll GeriGDT jetzt neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -1062,7 +1079,6 @@ class MainWindow(QMainWindow):
     def einstellungenBenutzer(self, checked, neustartfrage):
         de = dialogEinstellungenBenutzer.EinstellungenBenutzer(self.configPath)
         if de.exec() == 1:
-            self.configIni["Benutzer"]["einrichtung"] = de.lineEditEinrichtungsname.text()
             namen = []
             kuerzel = []
             for i in range(de.anzahlBenutzerzeilen):
@@ -1071,7 +1087,7 @@ class MainWindow(QMainWindow):
                     kuerzel.append(de.lineEditKuerzel[i].text())
             self.configIni["Benutzer"]["namen"] = "::".join(namen)
             self.configIni["Benutzer"]["kuerzel"] = "::".join(kuerzel)
-            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT neu gestartet werden.\nSoll GeriGDT jetzt neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -1087,7 +1103,7 @@ class MainWindow(QMainWindow):
         if de.exec() == 1:
             self.configIni["Erweiterungen"]["lanr"] = de.lineEditLanr.text()
             self.configIni["Erweiterungen"]["lizenzschluessel"] = gdttoolsL.GdtToolsLizenzschluessel.krypt(de.lineEditLizenzschluessel.text())
-            with open(os.path.join(self.configPath, "config.ini"), "w") as configfile:
+            with open(os.path.join(self.configPath, "config.ini"), "w", encoding="utf-8") as configfile:
                 self.configIni.write(configfile)
             if neustartfrage:
                 mb = QMessageBox(QMessageBox.Icon.Question, "Hinweis von GeriGDT", "Damit die Einstellungsänderungen wirksam werden, sollte GeriGDT neu gestartet werden.\nSoll GeriGDT jetzt neu gestartet werden?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)

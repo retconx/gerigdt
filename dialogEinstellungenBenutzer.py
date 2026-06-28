@@ -19,8 +19,7 @@ class EinstellungenBenutzer(QDialog):
 
         #config.ini lesen
         configIni = configparser.ConfigParser()
-        configIni.read(os.path.join(configPath, "config.ini"))
-        self.einrichtungsname = configIni["Benutzer"]["einrichtung"]
+        configIni.read(os.path.join(configPath, "config.ini"), encoding="utf-8")
         self.benutzernamen = (configIni["Benutzer"]["namen"]).split("::")
         self.benutzerkuerzel = (configIni["Benutzer"]["kuerzel"]).split("::")
         self.anzahlBenutzerzeilen = len(self.benutzernamen) + 1
@@ -38,12 +37,6 @@ class EinstellungenBenutzer(QDialog):
         self.dialogLayoutG = QGridLayout()
         self.scrollArea = QScrollArea()
         scrollWidget = QWidget()
-
-        labelEinrichtungsname = QLabel("Name der Einrichtung")
-        self.lineEditEinrichtungsname = QLineEdit(self.einrichtungsname)
-        self.lineEditEinrichtungsname.setPlaceholderText("Hausarztpraxis XY")
-        dialogLayoutV.addWidget(labelEinrichtungsname)
-        dialogLayoutV.addWidget(self.lineEditEinrichtungsname)
         
         self.labelNummern = QLabel("Nr.")
         self.labelNamen = QLabel("Name")
