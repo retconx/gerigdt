@@ -22,7 +22,8 @@ from PySide6.QtWidgets import (
     QDateEdit,
     QComboBox,
     QMessageBox, 
-    QCheckBox
+    QCheckBox,
+    QSlider
 )
 import requests
 
@@ -89,7 +90,7 @@ class MainWindow(QMainWindow):
     barthelTreppensteigen = ["Unfähig, allein Treppe zu steigen (0)", "Benötigt Hilfe oder Überwachung beim Treppensteigen (5)", "Selbstständiges Treppensteigen möglich (10)"]
     timedUpGo = ["< 10 Sekunden - Keine Mobilitätseinschränkung", "11-19 Sekunden - Leichte, i. d. R. irrelevante Mobilitätseinschränkung", "20-29 Sekunden - Relevante Mobilitätseinschränkung", "> 30 Sekunden - Starke Mobilitätseinschränkung", "Durchführung nicht möglich"]
     kognitiveFunktion = ["Keine oder leichte Einschränkung", "Mittlere Einschränkung", "Schwere Einschränkung"]
-    pflegegrad = ["1", "2", "3", "4", "5", "Nicht vorhanden/unbekannt", "Beantragt"]
+    pflegegrad = ["1", "2", "3", "4", "5", "Unbekannt", "Beantragt", "Nicht vorhanden"]
     verfuegungen = ["Patientenverfügung", "Vorsorgevollmacht", "Betreuungsverfügung"]
 
     # Mainwindow zentrieren
@@ -633,18 +634,24 @@ class MainWindow(QMainWindow):
             groupboxKognitiveFunktion.setLayout(groupboxLayout)
             groupboxKognitiveFunktion.setFont(fontBold)
 
-            groupboxLayout = QVBoxLayout()
+            groupboxLayout = QGridLayout()
             groupboxPflegegrad = QGroupBox("Pflegegrad")
             groupboxPflegegrad.setAutoFillBackground(True)
             groupboxPflegegrad.setPalette(farbe.getTextPalette(farbe.farben.GELB, self.palette()))
             self.radiobuttonPflegegrad = []
-            for radio in self.pflegegrad:
-                rb = QRadioButton(radio)
+            for radio in range(len(self.pflegegrad)):
+                rb = QRadioButton(self.pflegegrad[radio])
                 rb.setFont(font)
                 rb.clicked.connect(self.barthelGeklickt) # type: ignore
                 self.radiobuttonPflegegrad.append(rb)
-                groupboxLayout.addWidget(rb)
-            self.radiobuttonPflegegrad[len(self.pflegegrad) - 2].setChecked(True)
+                if radio < 5:
+                    groupboxLayout.addWidget(rb, radio, 0)
+                elif radio == 7:
+                    groupboxLayout.addWidget(rb, radio - 5, 1, 3, 1, Qt.AlignmentFlag.AlignTop)
+                else:
+                    groupboxLayout.addWidget(rb, radio - 5, 1)
+                
+            self.radiobuttonPflegegrad[5].setChecked(True) # "Unbekannt" standardmäßig gecheckt
             groupboxPflegegrad.setLayout(groupboxLayout)
             groupboxPflegegrad.setFont(fontBold)
 
@@ -893,11 +900,10 @@ class MainWindow(QMainWindow):
             pg = int(self.dokuZusammenfassungLesen(doku)[3])
             kf = int(self.dokuZusammenfassungLesen(doku)[4])
             vf = int(self.dokuZusammenfassungLesen(doku)[5])
+            print(pg)
             if pg == 0:
                 pg = 5
-            elif pg == 5:
-                pg = 6
-            else:
+            elif pg < 6:
                 pg -= 1
             self.radiobuttonTimedUpGo[tug].setChecked(True)
             self.radiobuttonPflegegrad[pg].setChecked(True)
@@ -1402,7 +1408,7 @@ class MainWindow(QMainWindow):
         sys.exit()
 
     def dokuZusammenfassen(self, barthel:list, timedUpGo:int, kognitiveFunktion:int, pflegegrad:int, verfuegungen:int):
-        # Untersuchungsdatum TTMMJJJJ + 10x Barthel hexadezimal + TUG 0-3 + PG 0-6 (unbekannt = 0) + KF 0-2
+        # Untersuchungsdatum TTMMJJJJ + 10x Barthel hexadezimal + TUG 0-3 + PG 0-6 (unbekannt = 0, 6 = beantragt, 7 = nicht vorhanden) + KF 0-2
         zusammenfassung = self.datum
         for b in barthel:
             punkte = int(b)
@@ -1413,6 +1419,8 @@ class MainWindow(QMainWindow):
             pflegegrad = 0
         elif pflegegrad == 7:
             pflegegrad = 6
+        elif pflegegrad == 8:
+            pflegegrad = 7
         zusammenfassung += str(timedUpGo) + str(pflegegrad) + str(kognitiveFunktion) + str(verfuegungen)
         return zusammenfassung
     
