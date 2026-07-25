@@ -24,7 +24,6 @@ class EinstellungenProgrammerweiterungen(QDialog):
         configIni.read(os.path.join(configPath, "config.ini"), encoding="utf-8")
         self.lanr = configIni["Erweiterungen"]["lanr"]
         self.lizenzschluessel = gdttoolsL.GdtToolsLizenzschluessel.dekrypt(configIni["Erweiterungen"]["lizenzschluessel"])
-
         self.setWindowTitle("LANR und Lizenzschlüssel")
         self.setMinimumWidth(460)
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -47,10 +46,12 @@ class EinstellungenProgrammerweiterungen(QDialog):
         groupboxLizenzschluessel.setStyleSheet("font-weight:bold")
         self.lineEditLizenzschluessel = QLineEdit(self.lizenzschluessel)
         self.lineEditLizenzschluessel.setStyleSheet("font-weight:normal")
-        gueltigBis = gdttoolsL.GdtToolsLizenzschluessel.gueltigBis(self.lizenzschluessel).strftime("%d.%m.%Y")
-        gueltigBisAngabe = "bis " + gueltigBis
-        if gueltigBis == "01.01.1900":
-            gueltigBisAngabe = "unbefristet"
+        gueltigBisAngabe = ""
+        if re.match(r"^.{5}-.{5}-.{5}-.{5}-.{5}$", self.lizenzschluessel) != None:
+            gueltigBis = gdttoolsL.GdtToolsLizenzschluessel.gueltigBis(self.lizenzschluessel).strftime("%d.%m.%Y")
+            gueltigBisAngabe = "bis " + gueltigBis
+            if gueltigBis == "01.01.1900":
+                gueltigBisAngabe = "unbefristet"
         labelGueltigBis = QLabel("Gültigkeit: " + gueltigBisAngabe)
         labelGueltigBis.setStyleSheet("font-weight:normal")
         groupboxLayoutLizenzschluessel.addWidget(self.lineEditLizenzschluessel)

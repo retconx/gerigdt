@@ -900,7 +900,6 @@ class MainWindow(QMainWindow):
             pg = int(self.dokuZusammenfassungLesen(doku)[3])
             kf = int(self.dokuZusammenfassungLesen(doku)[4])
             vf = int(self.dokuZusammenfassungLesen(doku)[5])
-            print(pg)
             if pg == 0:
                 pg = 5
             elif pg < 6:
