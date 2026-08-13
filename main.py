@@ -770,7 +770,7 @@ class MainWindow(QMainWindow):
             einstellungenBenutzerAction.setShortcut(QKeySequence("Ctrl+B"))
             ## Nur mit Lizenz           
             einstellungenErweiterungenAction = QAction("LANR/Lizenzschlüssel", self)
-            einstellungenErweiterungenAction.triggered.connect(lambda checked = False, neustartfrage = True: self.einstellungenLanrLizenzschluessel(checkbox, neustartfrage)) 
+            einstellungenErweiterungenAction.triggered.connect(lambda checked = False, neustartfrage = True: self.einstellungenLanrLizenzschluessel(checked, neustartfrage)) 
             einstellungenErweiterungenAction.setShortcut(QKeySequence("Ctrl+L"))
             einstellungenImportExportAction = QAction("Im- /Exportieren", self)
             einstellungenImportExportAction.triggered.connect(self.einstellungenImportExport) 
@@ -979,7 +979,7 @@ class MainWindow(QMainWindow):
             programmverzeichnis = sex[:sex.rfind("gerigdt.exe")]
         elif "darwin" in sys.platform:
             programmverzeichnis = sex[:sex.find("GeriGDT.app")]
-        elif "win32" in sys.platform:
+        elif "linux" in sys.platform:
             programmverzeichnis = sex[:sex.rfind("gerigdt")]
         logger.logger.info("Programmverzeichnis: " + programmverzeichnis)
         try:
